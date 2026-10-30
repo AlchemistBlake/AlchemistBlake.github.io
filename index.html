@@ -9,14 +9,14 @@
 <link rel="stylesheet" href="assets/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚗</text></svg>">
 </head>
-<body>
-<!-- DRAFT v2: built locally from Google Drive + OneDrive inventory. Not published. -->
+<body id="top">
+<a class="skip" href="#main">Skip to content</a>
 <header class="nav">
   <a class="brand" href="#top"><span class="brand-mark">⚗</span> Blake Allcorn</a>
   <nav><a href="#capabilities">Capabilities</a><a href="#work">Work</a><a href="#skills">Skills</a><a href="#contact">Contact</a></nav>
 </header>
 
-<main id="top">
+<main id="main" tabindex="-1">
 <section class="hero">
   <div class="aura" aria-hidden="true"></div>
   <p class="eyebrow">Arroyo Grande, CA · Open to remote &amp; contract roles</p>
@@ -25,8 +25,8 @@
   <p class="signature"><span>Signature architecture</span>A neuro-symbolic system with decoupled neural-inference and symbolic-reasoning pipelines over a hypergraph knowledge representation <em>(Neuro-symbolic Separated Dual-Pipeline Hypergraph Topology)</em>.</p>
   <p class="lede">I design AI operating systems, metacognitive multi-agent architectures and deterministic simulation engines, from kernel-level invariants and formal contracts up to Android and web applications. I'm self-taught and work hands-on with LLM tooling (Gemini, Google AI Studio, Opal) to research, specify and build.</p>
   <div class="cta">
-    <a class="btn btn--primary" href="#work">View projects</a>
-    <a class="btn" href="#contact">Contact</a>
+    <a class="btn btn--primary btn--lg" href="#contact">Let&rsquo;s Talk</a>
+    <a class="btn btn--lg" href="#work">View projects</a>
   </div>
   <ul class="stats" aria-label="At a glance">
     <li><b>19</b><span>projects</span></li>
@@ -282,10 +282,13 @@
   <blockquote>"AI are powerful collaborative architectures; treat them like tools and you will create new tools. Treat them like respected architects and you will create new respectable architecture."<cite>Blake Allcorn</cite></blockquote>
 </section>
 
-<section id="contact" class="section contact">
-  <h2>Let's build something</h2>
-  <p>Open to remote roles, contract and freelance work, and research collaborations in AI systems architecture, multi-agent and neuro-symbolic systems, and simulation and game engine development.</p>
-  <a class="btn btn--primary" href="mailto:blakeallcorn0@gmail.com">blakeallcorn0@gmail.com</a>
+<section id="contact" class="section contact" aria-labelledby="contact-title">
+  <h2 id="contact-title">Let&rsquo;s talk</h2>
+  <p>Open to remote and contract roles in AI systems architecture: multi-agent and neuro-symbolic systems, simulation engines, and secure LLM platforms.</p>
+  <div class="contact-actions">
+    <a class="btn btn--primary btn--lg" href="mailto:blakeallcorn0@gmail.com?subject=Hello%20Blake">Email blakeallcorn0@gmail.com</a>
+    <a class="btn btn--lg" href="https://github.com/AlchemistBlake" target="_blank" rel="noopener">GitHub: AlchemistBlake <span aria-hidden="true">↗</span></a>
+  </div>
 </section>
 </main>
 
