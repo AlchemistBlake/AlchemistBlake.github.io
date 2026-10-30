@@ -168,3 +168,6 @@ main:focus{outline:none}
 .deep-body{padding:0 14px 6px}
 .deep-body p{font-size:.88rem!important}
 @media (max-width:820px){.about-grid{grid-template-columns:1fr}.pa{grid-template-columns:1fr}}
+/* private source-code access button (mailto) */
+.btn--code{border-color:#c08a3e80;color:var(--gold)}
+.btn--code:hover{border-color:var(--gold);background:#c08a3e1a}
