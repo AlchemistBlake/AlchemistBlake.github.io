@@ -171,3 +171,4 @@ main:focus{outline:none}
 /* private source-code access button (mailto) */
 .btn--code{border-color:#c08a3e80;color:var(--gold)}
 .btn--code:hover{border-color:var(--gold);background:#c08a3e1a}
+.stats b .stat-of{font-size:.62em;color:var(--muted);font-family:inherit;letter-spacing:.02em}
