@@ -172,3 +172,6 @@ main:focus{outline:none}
 .btn--code{border-color:#c08a3e80;color:var(--gold)}
 .btn--code:hover{border-color:var(--gold);background:#c08a3e1a}
 .stats b .stat-of{font-size:.62em;color:var(--muted);font-family:inherit;letter-spacing:.02em}
+.btn--play{background:linear-gradient(90deg,#7c3aed,#8a5a1f);border:0;color:#fff;font-weight:600}
+.btn--play:hover{filter:brightness(1.12);background:linear-gradient(90deg,#7c3aed,#8a5a1f)}
+.links .btn--play{font-size:.85rem;padding:7px 14px}
