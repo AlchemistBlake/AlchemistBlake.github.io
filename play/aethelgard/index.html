@@ -56,7 +56,27 @@
   .topbar-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
   .back-link { font-size: 12px; color: var(--muted); text-decoration: none; letter-spacing: .5px; padding: 6px 2px; white-space: nowrap; }
   .back-link:hover, .back-link:focus-visible { color: var(--ember-gold); }
+  [hidden] { display: none !important; }
   .screen { display: none; }
+  .title-wrap { display: flex; align-items: center; justify-content: center; gap: clamp(12px, 4vw, 48px); flex-wrap: wrap; min-height: min(70vh, 620px); text-align: center; }
+  .title-main { max-width: 560px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .title-logo { font-size: clamp(34px, 8vw, 64px); letter-spacing: 8px; }
+  .title-sub { font-family: var(--font-heading); color: var(--soft-parchment); letter-spacing: 4px; margin-top: -8px; text-transform: uppercase; font-size: 13px; }
+  .title-card { width: 100%; border-color: var(--ember-gold); }
+  .title-card .who { font-family: var(--font-heading); color: var(--ember-gold); font-size: 12px; letter-spacing: 1px; }
+  .title-summary { font-family: Georgia, 'Palatino Linotype', serif; font-size: 16px; margin-top: 4px; color: #FFF; }
+  .title-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+  .title-actions .btn { min-width: 150px; min-height: 46px; }
+  #title-hero-canvas { width: 200px; height: 270px; border: 1px solid rgba(212,175,55,.35); border-radius: 6px; background: radial-gradient(circle at 50% 40%, rgba(65,90,119,.35), #050B14 70%); }
+  .storage-note { font-size: 12px; color: #E8C27A; background: rgba(212,175,55,.08); border: 1px dashed rgba(212,175,55,.45); border-radius: 4px; padding: 6px 10px; margin: 8px 0; }
+  .btn-quiet { border-color: rgba(192,57,43,.7); }
+  .btn.btn-danger { background: linear-gradient(180deg, #A93226 0%, #7B241C 100%); border-color: #E6B0AA; color: #FFF; }
+  .save-section { border-top: 1px solid rgba(65,90,119,.6); padding-top: 12px; margin-top: 12px; }
+  .save-section h3 { margin-bottom: 6px; }
+  .code-box { font-family: ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace; font-size: 13px; line-height: 1.4; resize: vertical; word-break: break-all; min-height: 84px; }
+  .code-box[aria-invalid="true"] { border-color: var(--crimson-valor); }
+  .copy-msg { align-self: center; margin: 0 0 0 6px; }
+  .import-msg { margin-top: 10px; padding: 8px 12px; border-left: 3px solid var(--crimson-valor); background: rgba(192,57,43,.14); color: #F5B7B1; font-family: Georgia, serif; font-size: 14px; }
   .screen.active { display: block; animation: fadein .25s ease; }
   @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
   .panel { background: rgba(13,27,42,.9); border: 1px solid var(--steel-blue); border-radius: 6px; padding: 14px; }
@@ -230,8 +250,33 @@
 </header>
 
 <main id="app">
+  <!-- SCREEN 0: Title -->
+  <section id="screen-title" class="screen active" aria-labelledby="h-title">
+    <div class="title-wrap">
+      <canvas id="title-hero-canvas" width="200" height="270" role="img" aria-label="Your saved hero" hidden></canvas>
+      <div class="title-main">
+        <h1 id="h-title" class="title-logo">AETHELGARD</h1>
+        <p class="title-sub">Chronicles of Lore</p>
+        <div class="panel title-card" id="title-save-card" hidden>
+          <div class="who">Your chronicle awaits</div>
+          <p class="title-summary" id="title-save-summary"></p>
+          <p class="sub" id="title-save-when"></p>
+        </div>
+        <p class="sub title-empty" id="title-save-empty">No chronicle has been written in this browser yet. Forge a hero to begin, or bring a save code.</p>
+        <p class="storage-note" id="title-damaged" hidden>The stored chronicle is damaged and cannot be read. You can delete it and begin again, or load a save code.</p>
+        <div class="title-actions">
+          <button type="button" class="btn btn-accent" id="btn-title-continue" hidden>▶ Continue</button>
+          <button type="button" class="btn" id="btn-title-new">✦ New Game</button>
+          <button type="button" class="btn" id="btn-title-codes">📜 Save Codes</button>
+          <button type="button" class="btn btn-quiet" id="btn-title-delete" hidden>🗑 Delete Save</button>
+        </div>
+        <p class="storage-note" id="title-storage-note" hidden>This browser is not keeping saves (storage is blocked or full). You can still play; export a save code from the Chronicle to carry your progress.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- SCREEN 1: Character Sanctuary -->
-  <section id="screen-sanctuary" class="screen active" aria-labelledby="h-sanctuary">
+  <section id="screen-sanctuary" class="screen" aria-labelledby="h-sanctuary">
     <h1 id="h-sanctuary">CHARACTER SANCTUARY</h1>
     <p class="sub">Forge your vessel within Aethelgard. Your vocation shapes your strength and your arts; the rest is how the world will remember you.</p>
     <div class="creator-grid">
@@ -351,6 +396,7 @@
       <div class="sub" style="margin:0">EXP <span id="haven-exp-text">0 / 100</span></div>
       <div class="exp-bar" aria-hidden="true"><i id="haven-exp-bar" style="width:0%"></i></div>
     </div>
+    <p class="storage-note" id="haven-storage-note" hidden>Saves are not being kept in this browser. Open the Chronicle to export a save code.</p>
     <div class="hub-grid">
       <div class="hub-card">
         <div><h3>Torben's Smelting Forge</h3><p>Temper your weapon and reinforce your armor. Paid in gold.</p></div>
@@ -370,7 +416,8 @@
       </div>
     </div>
     <div class="row-between">
-      <button type="button" class="btn" id="btn-revisit-sanctuary">↺ Modify Appearance</button>
+      <div class="option-row" style="margin:0"><button type="button" class="btn" id="btn-revisit-sanctuary">↺ Modify Appearance</button>
+      <button type="button" class="btn" id="btn-save-menu">📜 Chronicle &amp; Save Codes</button></div>
       <button type="button" class="btn btn-accent" id="btn-open-worldmap" style="padding: 12px 24px;">Deploy to Expeditions (World Map) ➔</button>
     </div>
   </section>
@@ -483,6 +530,41 @@
     <div class="option-row" style="justify-content:center">
       <button type="button" class="btn btn-accent" id="btn-confirm-yes">Retreat</button>
       <button type="button" class="btn" id="btn-confirm-no">Stand and fight</button>
+    </div>
+  </div>
+</div>
+<!-- Save menu -->
+<div class="modal" id="save-modal" role="dialog" aria-modal="true" aria-labelledby="h-save">
+  <div class="modal-card">
+    <div class="modal-head"><h2 id="h-save">THE CHRONICLE</h2><button type="button" class="btn btn-small" id="btn-close-save">✕ Close <kbd>Esc</kbd></button></div>
+    <p class="npc-line" id="save-line"></p>
+    <p class="sub" style="margin:-4px 0 12px">Your progress is saved automatically in this browser at every safe point: the Haven, the map, after each battle and each purchase.</p>
+    <p class="storage-note" id="save-storage-note" hidden>This browser is not keeping saves right now. A save code is the only way to keep this hero.</p>
+    <div class="save-section" id="save-export-block">
+      <h3>Export a save code</h3>
+      <label class="sub" for="save-code-out" style="display:block;margin-bottom:6px">Copy this code and keep it somewhere safe. Paste it into any browser to continue.</label>
+      <textarea id="save-code-out" class="text-input code-box" rows="4" readonly spellcheck="false"></textarea>
+      <div class="option-row"><button type="button" class="btn" id="btn-copy-code">✎ Copy code</button><span class="sub copy-msg" id="copy-msg" role="status" aria-live="polite"></span></div>
+    </div>
+    <p class="sub" id="save-no-export" hidden>There is no chronicle to export yet.</p>
+    <div class="save-section">
+      <h3>Import a save code</h3>
+      <label class="sub" for="save-code-in" style="display:block;margin-bottom:6px">Paste a code beginning with AETH1.</label>
+      <textarea id="save-code-in" class="text-input code-box" rows="4" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="AETH1.…" aria-describedby="import-msg"></textarea>
+      <div class="option-row"><button type="button" class="btn btn-accent" id="btn-import-code">Load chronicle</button></div>
+      <p class="import-msg" id="import-msg" role="alert" hidden></p>
+    </div>
+    <div class="row-between"><span></span><button type="button" class="btn" id="btn-save-to-title">⌂ Save &amp; return to title</button></div>
+  </div>
+</div>
+<!-- In-world confirm -->
+<div class="modal" id="ask-modal" role="alertdialog" aria-modal="true" aria-labelledby="h-ask" aria-describedby="ask-text">
+  <div class="modal-card" style="width:min(460px,100%); text-align:center">
+    <h2 id="h-ask"></h2>
+    <p class="sub" id="ask-text" style="margin:8px 0 16px"></p>
+    <div class="option-row" style="justify-content:center">
+      <button type="button" class="btn btn-accent" id="btn-ask-yes"></button>
+      <button type="button" class="btn" id="btn-ask-no"></button>
     </div>
   </div>
 </div>
@@ -787,28 +869,142 @@ class SovereignAudioEngine {
 }
 const AudioSys = new SovereignAudioEngine();
 
+// ---------- saves: autosave (localStorage) + portable save codes ----------
+// Save codes are integrity-checked, NOT tamper-proof. Anyone can decode a code, edit it and
+// recompute the checksum; that is acceptable for a single-player demo. The CRC32 only catches
+// typos, truncation and corruption. Imported values are still type-checked and clamped, so a
+// hand-edited code cannot crash the game or produce NaN. Nothing personal is stored: only the
+// hero you created and your progress, in this browser's localStorage.
+const SAVE_KEY = 'aethelgard.save.v1', SAVE_VERSION = 1, CODE_PREFIX = 'AETH1.';
+class SaveError extends Error { constructor(kind, detail) { super(detail || kind); this.kind = kind; this.detail = detail || ''; } }
+
+const SaveStore = {
+  available: null,
+  probe() {
+    try { const s = window.localStorage, k = SAVE_KEY + '.probe'; s.setItem(k, '1'); s.removeItem(k); this.available = true; }
+    catch (e) { this.available = false; }
+    return this.available;
+  },
+  read() { if (!this.available) return null; try { return window.localStorage.getItem(SAVE_KEY); } catch (e) { this.available = false; return null; } },
+  write(str) { if (!this.available) return false; try { window.localStorage.setItem(SAVE_KEY, str); return true; } catch (e) { this.available = false; return false; } },
+  clear() { if (!this.available) return false; try { window.localStorage.removeItem(SAVE_KEY); return true; } catch (e) { this.available = false; return false; } }
+};
+
+const SaveCodec = {
+  crcTable: null,
+  crc32(str) {
+    if (!this.crcTable) { this.crcTable = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; this.crcTable[n] = c >>> 0; } }
+    let c = 0xFFFFFFFF; for (let i = 0; i < str.length; i++) c = this.crcTable[(c ^ str.charCodeAt(i)) & 0xFF] ^ (c >>> 8);
+    return ((c ^ 0xFFFFFFFF) >>> 0).toString(16).padStart(8, '0');
+  },
+  toB64url(text) {
+    const bytes = new TextEncoder().encode(text); let bin = '';
+    for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  },
+  fromB64url(s) {
+    if (!/^[A-Za-z0-9_-]+$/.test(s)) throw new SaveError('decode', 'unexpected characters');
+    const bin = atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4));
+    const bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+  },
+  // Short keys keep codes compact. Unknown keys pass through unchanged, so the map can grow with new versions.
+  KEYS: { hero: 'h', name: 'n', pron: 'p', vocation: 'c', cosmetics: 'k', skinColor: 'sk', hairColor: 'hc', hairStyle: 'hs', eyeColor: 'ec', faceMark: 'fm', outfit: 'of', capeStyle: 'cs', offhand: 'oh',
+    prog: 'g', level: 'l', exp: 'x', hp: 'hp', mp: 'mp', stats: 'st', maxHp: 'mh', maxMp: 'mm', str: 's', int: 'i', dex: 'd', end: 'e',
+    purse: 'u', gold: 'au', shards: 'sh', potions: 'po', gear: 'q', weaponTier: 'wt', armorTier: 'at', relics: 'r', prism: 'pr', amulet: 'am', sigil: 'sg', feathers: 'fe', feathersUsed: 'fu',
+    pipGift: 'pg', world: 'w', screen: 'sc', location: 'lo', cleared: 'cl', highestTier: 'ht', record: 'rc', wins: 'wi', losses: 'lx', retreats: 're', fights: 'fi',
+    settings: 'o', voice: 'vo', narrationCollapsed: 'nc', savedAt: 't' },
+  remap(o, map) { if (Array.isArray(o)) return o.map(x => this.remap(x, map)); if (!o || typeof o !== 'object') return o; const r = {}; for (const k of Object.keys(o)) r[map[k] || k] = this.remap(o[k], map); return r; },
+  get UNKEYS() { if (!this._un) { this._un = {}; for (const [k, v] of Object.entries(this.KEYS)) this._un[v] = k; } return this._un; },
+  encode(data) { const payload = this.toB64url(JSON.stringify(this.remap(data, this.KEYS))); return CODE_PREFIX + payload + '.' + this.crc32(payload); },
+  decode(code) {
+    const s = String(code || '').replace(/\s+/g, '');
+    if (!s) throw new SaveError('empty');
+    if (!s.startsWith(CODE_PREFIX)) throw new SaveError('prefix');
+    const body = s.slice(CODE_PREFIX.length), dot = body.lastIndexOf('.');
+    if (dot < 1 || !/^[0-9a-f]{8}$/i.test(body.slice(dot + 1))) throw new SaveError('format');
+    const payload = body.slice(0, dot);
+    if (this.crc32(payload) !== body.slice(dot + 1).toLowerCase()) throw new SaveError('checksum');
+    let obj; try { obj = JSON.parse(this.fromB64url(payload)); } catch (e) { throw new SaveError('decode', e.message); }
+    return this.remap(obj, this.UNKEYS);
+  }
+};
+
+// Migration scaffolding: MIGRATIONS[n] upgrades a version-n save to version n+1.
+// Example for a future v2:  1: d => { d.world.bossesDefeated = []; d.v = 2; return d; },
+const MIGRATIONS = {};
+function migrateSave(d) {
+  if (!d || typeof d !== 'object' || Array.isArray(d)) throw new SaveError('schema', 'not an object');
+  if (typeof d.v !== 'number' || !Number.isInteger(d.v) || d.v < 1) throw new SaveError('schema', 'v');
+  if (d.v > SAVE_VERSION) throw new SaveError('newer');
+  for (let guard = 0; d.v < SAVE_VERSION && guard < 50; guard++) { const m = MIGRATIONS[d.v]; if (!m) throw new SaveError('version'); d = m(d); }
+  return d;
+}
+
+// Validate field types and clamp numbers. Throws SaveError('schema', path) on a wrong type.
+function sanitizeSave(raw) {
+  const d = migrateSave(raw);
+  const obj = (o, path) => { if (!o || typeof o !== 'object' || Array.isArray(o)) throw new SaveError('schema', path); return o; };
+  const num = (o, k, min, max, path, int = true) => { const v = o[k]; if (typeof v !== 'number' || !Number.isFinite(v)) throw new SaveError('schema', path + '.' + k); const c = Math.min(max, Math.max(min, v)); return int ? Math.floor(c) : c; };
+  const bool = (o, k, path) => { if (typeof o[k] !== 'boolean') throw new SaveError('schema', path + '.' + k); return o[k]; };
+  const pick = (o, k, list, path) => { if (typeof o[k] !== 'string' || !list.includes(o[k])) throw new SaveError('schema', path + '.' + k); return o[k]; };
+  const opts = (sel, key) => [...document.querySelectorAll(sel)].map(b => b.dataset[key]);
+  const swatch = key => [...document.querySelectorAll(`.swatches[data-key="${key}"] .color-swatch`)].map(s => s.dataset.val);
+  const h = obj(d.hero, 'hero'), k = obj(h.cosmetics, 'hero.cosmetics');
+  if (typeof h.name !== 'string') throw new SaveError('schema', 'hero.name');
+  const name = h.name.replace(/[\u0000-\u001F\u007F<>]/g, '').trim().slice(0, 18) || 'Valerius';
+  const g = obj(d.prog, 'prog'), u = obj(d.purse, 'purse'), q = obj(d.gear, 'gear'), r = obj(q.relics, 'gear.relics'), w = obj(d.world, 'world'), o = obj(d.settings, 'settings');
+  const cl = obj(w.cleared, 'world.cleared'), rc = obj(w.record, 'world.record');
+  const cleared = {}; for (const id of Object.keys(LOCATIONS)) cleared[id] = cl[id] === undefined ? 0 : num(cl, id, 0, 1e6, 'world.cleared');
+  const highestTier = Math.max(0, ...Object.keys(LOCATIONS).filter(id => cleared[id] > 0).map(id => LOCATIONS[id].tier));
+  if (g.stats !== undefined) obj(g.stats, 'prog.stats'); // stats are derived from level and gear and recomputed on load
+  return {
+    v: SAVE_VERSION,
+    hero: { name, pron: pick(h, 'pron', Object.keys(PRONOUNS), 'hero'), vocation: pick(h, 'vocation', Object.keys(CLASSES), 'hero'),
+      cosmetics: { skinColor: pick(k, 'skinColor', swatch('skinColor'), 'cosmetics'), hairColor: pick(k, 'hairColor', swatch('hairColor'), 'cosmetics'), hairStyle: pick(k, 'hairStyle', opts('.hair-style-btn', 'style'), 'cosmetics'),
+        eyeColor: pick(k, 'eyeColor', swatch('eyeColor'), 'cosmetics'), faceMark: pick(k, 'faceMark', opts('.face-mark-btn', 'mark'), 'cosmetics'), outfit: pick(k, 'outfit', opts('.outfit-style-btn', 'outfit'), 'cosmetics'),
+        capeStyle: pick(k, 'capeStyle', opts('.cape-style-btn', 'cape'), 'cosmetics'), offhand: pick(k, 'offhand', opts('.offhand-style-btn', 'offhand'), 'cosmetics') } },
+    prog: { level: num(g, 'level', 1, 99, 'prog'), exp: num(g, 'exp', 0, 1e7, 'prog'), hp: num(g, 'hp', 1, 1e5, 'prog'), mp: num(g, 'mp', 0, 1e5, 'prog') },
+    purse: { gold: num(u, 'gold', 0, 9999999, 'purse'), shards: num(u, 'shards', 0, 99999, 'purse'), potions: num(u, 'potions', 0, MAX_POTIONS, 'purse') },
+    gear: { weaponTier: num(q, 'weaponTier', 0, SHOP.forge.items[0].tiers.length, 'gear'), armorTier: num(q, 'armorTier', 0, SHOP.forge.items[1].tiers.length, 'gear'),
+      relics: { prism: bool(r, 'prism', 'relics'), amulet: bool(r, 'amulet', 'relics'), sigil: bool(r, 'sigil', 'relics') },
+      feathers: num(q, 'feathers', 0, 9, 'gear'), feathersUsed: num(q, 'feathersUsed', 0, 1e6, 'gear') },
+    pipGift: bool(d, 'pipGift', 'save'),
+    world: { screen: pick(w, 'screen', ['HAVEN', 'WORLDMAP'], 'world'), location: pick(w, 'location', Object.keys(LOCATIONS), 'world'), cleared, highestTier,
+      record: { wins: num(rc, 'wins', 0, 1e6, 'record'), losses: num(rc, 'losses', 0, 1e6, 'record'), retreats: num(rc, 'retreats', 0, 1e6, 'record'), fights: num(rc, 'fights', 0, 1e6, 'record') } },
+    settings: { voice: bool(o, 'voice', 'settings'), narrationCollapsed: bool(o, 'narrationCollapsed', 'settings') },
+    savedAt: typeof d.savedAt === 'number' && Number.isFinite(d.savedAt) ? d.savedAt : 0
+  };
+}
+const SAVE_ERRORS = {
+  empty: 'There is nothing written here yet. Paste a save code first.',
+  prefix: 'This is not an Aethelgard save code. A true code begins with AETH1.',
+  format: 'The code is incomplete; its closing seal is missing or cut short.',
+  checksum: 'The seal on this code is broken: a character was changed or lost along the way. Copy the code again.',
+  decode: 'The ink has smudged; this code cannot be read.',
+  newer: 'This chronicle was written by a newer version of Aethelgard.',
+  version: 'This chronicle comes from a version of Aethelgard that can no longer be read.',
+  schema: 'The code can be read, but what it records is not a valid chronicle.'
+};
+
 // ---------- the engine ----------
 const $ = id => document.getElementById(id);
 class GameEngine {
   constructor() {
     this.canvas = $('combat-stage'); this.ctx = this.canvas.getContext('2d');
     this.previewCanvas = $('sanctuary-preview-canvas'); this.previewCtx = this.previewCanvas.getContext('2d');
-    this.player = {
-      name: 'Valerius', pron: 'they', vocation: 'WARRIOR', level: 1, exp: 0, gold: 250, astralShards: 10, potions: 3,
-      hp: 0, maxHp: 0, mp: 0, maxMp: 0, str: 0, int: 0, dex: 0, end: 0,
-      weaponTier: 0, armorTier: 0, relics: { prism: false, amulet: false, sigil: false }, feathers: 0, pipGift: true,
-      guard: null, warcry: 0, shadow: false, shadowCrit: false, vesselBound: false,
-      cosmetics: { skinColor: '#F5D0A9', hairColor: '#D4AF37', hairStyle: 'spiky', eyeColor: '#2980B9', faceMark: 'none', outfit: 'plate', capeStyle: 'full', offhand: 'shield' }
-    };
+    this.player = this.newPlayer(); this.progress = this.newProgress();
     this.recalc(true);
     this.activeEnemy = null; this.currentLocation = 'loc_haven'; this.selectedLocation = 'loc_haven';
-    this.gameState = 'SANCTUARY'; this.turn = 'PLAYER';
+    this.gameState = 'TITLE'; this.turn = 'PLAYER'; this.titleHero = null; this.askState = null;
+    this.titleCanvas = $('title-hero-canvas'); this.titleCtx = this.titleCanvas.getContext('2d');
     this.timers = new Set(); this.combatGen = 0; this.lastScreen = 'HAVEN';
     this.playerAnim = this.freshAnim(1); this.enemyAnim = this.freshAnim(-1);
     this.particles = []; this.floatingTexts = []; this.bolts = []; this.screenShake = 0; this.time = 0;
     this.stats = { wins: 0, losses: 0, retreats: 0, fights: 0 };
     this.setStageMode();
-    this.buildMap(); this.bindDOMEvents(); this.renderClassCard(); this.updateHUD(); this.startLoop();
+    SaveStore.probe();
+    this.buildMap(); this.bindDOMEvents(); this.renderClassCard(); this.updateHUD(); this.renderTitle(); this.startLoop();
     window.addEventListener('resize', () => this.setStageMode());
   }
 
@@ -855,10 +1051,14 @@ class GameEngine {
   }
 
   // ----- narration -----
+  syncNarrationBtn() {
+    const c = $('combat-narration').classList.contains('collapsed'), b = $('btn-hide-narration');
+    b.setAttribute('aria-label', c ? 'Show narration' : 'Hide narration'); b.setAttribute('aria-expanded', String(!c)); b.textContent = c ? '▾' : '✕';
+  }
   say(text, who = 'The Chronicle') {
     if (this.gameState === 'COMBAT') {
       $('combat-speaker').textContent = who; $('combat-text').textContent = text;
-      $('combat-narration').classList.remove('collapsed'); $('btn-hide-narration').setAttribute('aria-label', 'Hide narration');
+      // A collapsed panel stays collapsed (saved preference); the speaker line still shows who is talking.
     } else {
       $('toast-speaker').textContent = who; $('toast-text').textContent = text; $('toast').classList.add('open');
       clearTimeout(this.toastTimer); this.toastTimer = setTimeout(() => $('toast').classList.remove('open'), 9000);
@@ -1293,7 +1493,7 @@ class GameEngine {
     p.guard = null;
     if (p.hp <= 0) {
       if (p.feathers > 0) {
-        p.feathers--; p.hp = Math.round(p.maxHp * 0.3);
+        p.feathers--; p.feathersUsed++; p.hp = Math.round(p.maxHp * 0.3);
         this.spawnSparks(this.playerCoords.x, this.playerCoords.y - 40, '#F39C12', 40);
         this.say(this.t("{name} falls, and the Phoenix Feather bursts into flame. {name} rises again!"));
       } else { Object.assign(this.playerAnim, { state: 'DEFEAT', timer: 0, xOffset: -30 }); this.say(this.t('{name} staggers back and falls.')); return this.later(() => this.executePlayerDefeat(), 1100); }
@@ -1322,7 +1522,9 @@ class GameEngine {
         lp.innerHTML = `<h2>LEVEL UP · LVL ${p.level}</h2><p class="sub" style="color:var(--soft-parchment)">${this.t('The blight\'s ebb flows into {name}. {name} grows stronger, and {their} wounds close.')}</p><div class="gains">${['maxHp', 'maxMp', 'str', 'int', 'dex', 'end'].map(g).join('')}</div>`;
         lp.hidden = false; AudioSys.playLevel();
       } else lp.hidden = true;
-      this.switchScreen('VICTORY');
+      const loc = this.currentLocation; this.progress.cleared[loc] = (this.progress.cleared[loc] || 0) + 1;
+      this.progress.highestTier = Math.max(this.progress.highestTier, LOCATIONS[loc].tier);
+      this.switchScreen('VICTORY'); this.autosave('WORLDMAP');
     }, 900);
   }
 
@@ -1331,7 +1533,7 @@ class GameEngine {
     p.gold -= lost; p.pipGift = true; this.stats.losses++; this.turn = 'OVER';
     $('defeat-gold').textContent = `-${lost} GOLD`;
     $('defeat-story').textContent = this.t("The {enemy}'s blow drives {name} to the ground, and the world goes dark. Hours later, Pip finds {them} at the edge of the " + LOCATIONS[this.currentLocation].name.replace(/^The /, '') + " and drags {them}, inch by inch, back to the Haven gates.");
-    this.switchScreen('DEFEAT');
+    this.switchScreen('DEFEAT'); this.autosave('HAVEN');
   }
 
   retreat() {
@@ -1388,14 +1590,16 @@ class GameEngine {
   switchScreen(name) {
     if (this.gameState === 'COMBAT' && name !== 'COMBAT') { this.cancelTimers(); AudioSys.silence(); }
     this.gameState = name;
-    $('skills-modal').classList.remove('open'); $('shop-modal').classList.remove('open'); $('confirm-modal').classList.remove('open');
+    ['skills-modal', 'shop-modal', 'confirm-modal', 'save-modal', 'ask-modal'].forEach(id => $(id).classList.remove('open'));
     if (name === 'COMBAT') $('toast').classList.remove('open');
-    const ids = { SANCTUARY: 'screen-sanctuary', HAVEN: 'screen-haven', WORLDMAP: 'screen-worldmap', COMBAT: 'screen-combat', VICTORY: 'screen-victory', DEFEAT: 'screen-defeat' };
+    const ids = { TITLE: 'screen-title', SANCTUARY: 'screen-sanctuary', HAVEN: 'screen-haven', WORLDMAP: 'screen-worldmap', COMBAT: 'screen-combat', VICTORY: 'screen-victory', DEFEAT: 'screen-defeat' };
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === ids[name]));
     if (name === 'HAVEN') { this.player.hp = this.player.maxHp; this.player.mp = this.player.maxMp; } // the Haven restores body and spirit
     if (name === 'WORLDMAP') this.selectLocation(this.selectedLocation);
     if (name === 'SANCTUARY') this.syncCreator();
+    if (name === 'TITLE') this.renderTitle();
     this.updateHUD();
+    if (name === 'HAVEN' || name === 'WORLDMAP') this.autosave(name);
     window.scrollTo(0, 0);
     const h = document.querySelector('.screen.active h1, .screen.active h2');
     if (h && name !== 'COMBAT') { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
@@ -1445,7 +1649,7 @@ class GameEngine {
     else if (id === 'gift') { if (!p.pipGift || p.potions >= MAX_POTIONS) return; p.pipGift = false; p.potions++; msg = "Pip: 'Piiip! Fresh moss from the glen. One draught, just for you!'"; }
     else if (id === 'brew') { if (p.gold < it.price || p.potions >= MAX_POTIONS) return; p.gold -= it.price; p.potions++; msg = "Pip: 'Bubble, bubble... done! Drink it when it hurts.'"; }
     else { if (p.astralShards < it.price || (it.once && p.relics[id])) return; p.astralShards -= it.price; if (id === 'feather') p.feathers++; else p.relics[id] = true; this.recalc(); msg = `Isla: 'The ${it.name} is yours. Guard it with your life.'`; }
-    AudioSys.playHeal(); this.updateHUD(); this.openShop(this.shopKey); $('shop-line').textContent = msg;
+    AudioSys.playHeal(); this.updateHUD(); this.autosave('HAVEN'); this.openShop(this.shopKey); $('shop-line').textContent = msg;
   }
   openSanctum() {
     const p = this.player, cls = this.cls;
@@ -1458,6 +1662,176 @@ class GameEngine {
       <p class="sub" style="margin-bottom:10px">Each element deals <b>×1.5</b> to the next on the wheel, <b>×0.5</b> to its own kind, and <b>×0.75</b> to the element that beats it. Physical blows are always ×1.</p>
       <table class="bestiary"><thead><tr><th>Foe</th><th>Danger</th><th>Element</th><th>Weak to</th><th>Your art</th></tr></thead><tbody>${rows}</tbody></table>`;
     $('shop-modal').classList.add('open'); $('btn-close-shop').focus();
+  }
+
+  // ----- saving -----
+  newPlayer() {
+    return {
+      name: 'Valerius', pron: 'they', vocation: 'WARRIOR', level: 1, exp: 0, gold: 250, astralShards: 10, potions: 3,
+      hp: 0, maxHp: 0, mp: 0, maxMp: 0, str: 0, int: 0, dex: 0, end: 0,
+      weaponTier: 0, armorTier: 0, relics: { prism: false, amulet: false, sigil: false }, feathers: 0, feathersUsed: 0, pipGift: true,
+      guard: null, warcry: 0, shadow: false, shadowCrit: false, vesselBound: false,
+      cosmetics: { skinColor: '#F5D0A9', hairColor: '#D4AF37', hairStyle: 'spiky', eyeColor: '#2980B9', faceMark: 'none', outfit: 'plate', capeStyle: 'full', offhand: 'shield' }
+    };
+  }
+  newProgress() { const cleared = {}; Object.keys(LOCATIONS).forEach(id => { cleared[id] = 0; }); return { cleared, highestTier: 0 }; }
+  serialize(screen) {
+    const p = this.player;
+    return {
+      v: SAVE_VERSION,
+      hero: { name: p.name, pron: p.pron, vocation: p.vocation, cosmetics: { ...p.cosmetics } },
+      prog: { level: p.level, exp: p.exp, hp: p.hp, mp: p.mp, stats: { maxHp: p.maxHp, maxMp: p.maxMp, str: p.str, int: p.int, dex: p.dex, end: p.end } },
+      purse: { gold: p.gold, shards: p.astralShards, potions: p.potions },
+      gear: { weaponTier: p.weaponTier, armorTier: p.armorTier, relics: { ...p.relics }, feathers: p.feathers, feathersUsed: p.feathersUsed },
+      pipGift: p.pipGift,
+      world: { screen: screen || (this.gameState === 'WORLDMAP' || this.gameState === 'VICTORY' ? 'WORLDMAP' : 'HAVEN'), location: this.selectedLocation,
+        cleared: { ...this.progress.cleared }, highestTier: this.progress.highestTier, record: { ...this.stats } },
+      settings: { voice: AudioSys.voice, narrationCollapsed: $('combat-narration').classList.contains('collapsed') },
+      savedAt: Date.now()
+    };
+  }
+  // Safe points only: never mid-combat, so a reload during a fight resumes before it.
+  autosave(screen) {
+    if (!this.player.vesselBound || this.gameState === 'COMBAT') return false;
+    const ok = SaveStore.write(JSON.stringify(this.serialize(screen)));
+    this.updateStorageNotes(); return ok;
+  }
+  patchSavedSettings() { // settings can change mid-fight; only the settings block of the stored save is touched
+    const s = this.readStoredSave(); if (!s.data) return;
+    s.data.settings = { voice: AudioSys.voice, narrationCollapsed: $('combat-narration').classList.contains('collapsed') };
+    SaveStore.write(JSON.stringify(s.data)); this.updateStorageNotes();
+  }
+  readStoredSave() {
+    const raw = SaveStore.read(); if (raw == null) return { data: null, damaged: false };
+    try { return { data: sanitizeSave(JSON.parse(raw)), damaged: false }; } catch (e) { return { data: null, damaged: true }; }
+  }
+  applySave(d) {
+    this.cancelTimers(); this.activeEnemy = null;
+    const p = this.newPlayer();
+    Object.assign(p, { name: d.hero.name, pron: d.hero.pron, vocation: d.hero.vocation, cosmetics: { ...d.hero.cosmetics }, level: d.prog.level, exp: d.prog.exp,
+      gold: d.purse.gold, astralShards: d.purse.shards, potions: d.purse.potions, weaponTier: d.gear.weaponTier, armorTier: d.gear.armorTier,
+      relics: { ...d.gear.relics }, feathers: d.gear.feathers, feathersUsed: d.gear.feathersUsed, pipGift: d.pipGift, vesselBound: true });
+    this.player = p;
+    while (p.exp >= this.expNeeded() && p.level < 99) { p.exp -= this.expNeeded(); p.level++; } // keep EXP below the next threshold
+    this.recalc(false);
+    p.hp = Math.max(1, Math.min(p.maxHp, d.prog.hp)); p.mp = Math.max(0, Math.min(p.maxMp, d.prog.mp));
+    this.progress = { cleared: { ...d.world.cleared }, highestTier: d.world.highestTier };
+    this.stats = { ...d.world.record };
+    this.selectedLocation = d.world.location; this.currentLocation = d.world.location;
+    this.setVoice(d.settings.voice);
+    $('combat-narration').classList.toggle('collapsed', d.settings.narrationCollapsed); this.syncNarrationBtn();
+    $('input-char-name').value = p.name;
+    this.switchScreen(d.world.screen);
+  }
+  summaryOf(d) {
+    const where = d.world.screen === 'HAVEN' ? 'The Haven' : `${LOCATIONS[d.world.location].name} (on the map)`;
+    return `${d.hero.name} · ${CLASSES[d.hero.vocation].label} · Lvl ${d.prog.level} · ${where}`;
+  }
+  updateStorageNotes() {
+    const blocked = !SaveStore.available;
+    ['title-storage-note', 'haven-storage-note', 'save-storage-note'].forEach(id => { const el = $(id); if (el) el.hidden = !blocked; });
+  }
+  setVoice(on) {
+    AudioSys.voice = !!on; const b = $('btn-voice');
+    b.setAttribute('aria-pressed', String(AudioSys.voice)); b.textContent = AudioSys.voice ? '🔊 Voice: On' : '🔇 Voice: Off';
+    if (!AudioSys.voice) AudioSys.silence();
+  }
+  // ----- title screen -----
+  renderTitle() {
+    const s = this.readStoredSave(), d = s.data;
+    $('title-save-card').hidden = !d; $('btn-title-continue').hidden = !d; $('btn-title-delete').hidden = !(d || s.damaged);
+    $('title-save-empty').hidden = !!d || s.damaged; $('title-damaged').hidden = !s.damaged;
+    $('title-hero-canvas').hidden = !d; this.titleHero = d ? { cosmetics: d.hero.cosmetics, vocation: d.hero.vocation } : null;
+    if (d) {
+      $('title-save-summary').textContent = this.summaryOf(d);
+      $('title-save-when').textContent = d.savedAt ? `Last written ${new Date(d.savedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })} · ${d.world.record.wins} ${d.world.record.wins === 1 ? "victory" : "victories"}` : '';
+    }
+    this.updateStorageNotes();
+  }
+  titleContinue() {
+    const s = this.readStoredSave(); if (!s.data) return this.renderTitle();
+    this.applySave(s.data);
+    this.say(this.t('The chronicle opens where it was left. Welcome back, {name}.'));
+  }
+  titleNewGame() {
+    const s = this.readStoredSave();
+    const go = () => {
+      this.cancelTimers(); this.player = this.newPlayer(); this.recalc(true); this.progress = this.newProgress();
+      this.stats = { wins: 0, losses: 0, retreats: 0, fights: 0 }; this.selectedLocation = this.currentLocation = 'loc_haven';
+      $('input-char-name').value = this.player.name; this.syncCreator(); this.switchScreen('SANCTUARY');
+    };
+    if (!s.data) return go();
+    this.ask({ title: 'Begin a new chronicle?', text: `The saved chronicle of ${s.data.hero.name} (Lvl ${s.data.prog.level} ${CLASSES[s.data.hero.vocation].label}) will be overwritten as soon as your new hero is bound. Export a save code first if you want to keep it.`,
+      yes: 'Begin anew', no: 'Keep my chronicle', onYes: go, returnFocus: $('btn-title-new') });
+  }
+  titleDelete() {
+    this.ask({ title: 'Burn this chronicle?', text: 'The saved hero and all progress in this browser will be erased. This cannot be undone, unless you have a save code.',
+      yes: 'Delete save', no: 'Keep it', danger: true, returnFocus: $('btn-title-delete'),
+      onYes: () => { SaveStore.clear(); this.renderTitle(); $('btn-title-new').focus(); this.say('The pages curl into ash. A blank chronicle waits.'); } });
+  }
+  // ----- in-world confirm -----
+  ask({ title, text, yes, no, onYes, danger = false, returnFocus = null }) {
+    $('h-ask').textContent = title; $('ask-text').textContent = text;
+    const y = $('btn-ask-yes'), n = $('btn-ask-no'); y.textContent = yes; n.textContent = no; y.classList.toggle('btn-danger', danger);
+    this.askState = { onYes, returnFocus };
+    $('ask-modal').classList.add('open'); n.focus();
+  }
+  answerAsk(yes) {
+    const st = this.askState; this.askState = null; $('ask-modal').classList.remove('open');
+    if (!st) return;
+    if (yes && st.onYes) st.onYes(); else if (st.returnFocus && st.returnFocus.offsetParent) st.returnFocus.focus();
+  }
+  // ----- save menu -----
+  openSaveMenu() {
+    const fromTitle = this.gameState === 'TITLE';
+    let data = null;
+    if (this.player.vesselBound && !fromTitle) data = this.serialize();
+    else { const s = this.readStoredSave(); data = s.data; }
+    $('save-export-block').hidden = !data; $('save-no-export').hidden = !!data;
+    $('save-code-out').value = data ? SaveCodec.encode(data) : '';
+    $('copy-msg').textContent = ''; $('import-msg').hidden = true; $('save-code-in').value = '';
+    $('btn-save-to-title').hidden = fromTitle;
+    $('save-line').textContent = fromTitle ? "Archivist Oren: 'Bring me a chronicle code and I will read your hero back into the world.'"
+      : "Archivist Oren: 'Your deeds are written here, and copied into a code you can carry to any hearth.'";
+    this.updateStorageNotes();
+    $('save-modal').classList.add('open');
+    (data ? $('btn-copy-code') : $('save-code-in')).focus();
+  }
+  async copySaveCode() {
+    const box = $('save-code-out'), msg = $('copy-msg');
+    try {
+      if (!navigator.clipboard || !window.isSecureContext) throw new Error('no clipboard');
+      await navigator.clipboard.writeText(box.value); msg.textContent = 'Copied. Keep it somewhere safe.';
+    } catch (e) {
+      box.focus(); box.select(); box.setSelectionRange(0, box.value.length);
+      msg.textContent = 'Selected. Press Ctrl+C (or long-press and Copy) to copy it.';
+    }
+  }
+  importSaveCode() {
+    const msg = $('import-msg');
+    let data;
+    try { data = sanitizeSave(SaveCodec.decode($('save-code-in').value)); }
+    catch (e) {
+      const kind = e instanceof SaveError ? e.kind : 'decode';
+      msg.textContent = "Archivist Oren frowns: '" + (SAVE_ERRORS[kind] || SAVE_ERRORS.decode) + "'"; msg.hidden = false; msg.dataset.kind = kind;
+      $('save-code-in').setAttribute('aria-invalid', 'true'); $('save-code-in').focus(); return false;
+    }
+    $('save-code-in').removeAttribute('aria-invalid'); msg.hidden = true;
+    const load = () => {
+      $('save-modal').classList.remove('open');
+      this.applySave(data); this.autosave(data.world.screen);
+      this.say(this.t('Archivist Oren reads the code aloud, and {name} steps out of the pages and back into Aethelgard.'));
+    };
+    const s = this.readStoredSave();
+    if (s.data || this.player.vesselBound) {
+      const cur = s.data || this.serialize();
+      this.ask({ title: 'Replace your chronicle?', text: `Loading ${this.summaryOf(data)} will overwrite ${cur.hero.name} (Lvl ${cur.prog.level}).`,
+        yes: 'Load this chronicle', no: 'Cancel', onYes: load, returnFocus: $('btn-import-code') });
+    } else load();
+    return true;
+  }
+  returnToTitle() {
+    this.autosave(); $('save-modal').classList.remove('open'); this.switchScreen('TITLE');
   }
 
   // ----- map -----
@@ -1498,25 +1872,38 @@ class GameEngine {
   }
 
   bindDOMEvents() {
-    const p = this.player, c = p.cosmetics;
+    // Handlers read this.player at click time: New Game and loading a save replace the player object.
+    const P = () => this.player, C = () => this.player.cosmetics;
     const bindRow = (sel, key, apply) => document.querySelectorAll(sel).forEach(b => b.addEventListener('click', () => { this.setPressed(sel, b); apply(b.dataset[key]); }));
-    bindRow('.class-btn', 'class', v => { if (p.vesselBound) return; p.vocation = v; Object.assign(c, CLASSES[v].look); this.recalc(true); this.syncCreator(); });
-    bindRow('.pron-btn', 'pron', v => { p.pron = v; });
-    bindRow('.hair-style-btn', 'style', v => { c.hairStyle = v; });
-    bindRow('.face-mark-btn', 'mark', v => { c.faceMark = v; });
-    bindRow('.outfit-style-btn', 'outfit', v => { c.outfit = v; });
-    bindRow('.cape-style-btn', 'cape', v => { c.capeStyle = v; });
-    bindRow('.offhand-style-btn', 'offhand', v => { c.offhand = v; });
+    bindRow('.class-btn', 'class', v => { const p = P(); if (p.vesselBound) return; p.vocation = v; Object.assign(p.cosmetics, CLASSES[v].look); this.recalc(true); this.syncCreator(); });
+    bindRow('.pron-btn', 'pron', v => { P().pron = v; });
+    bindRow('.hair-style-btn', 'style', v => { C().hairStyle = v; });
+    bindRow('.face-mark-btn', 'mark', v => { C().faceMark = v; });
+    bindRow('.outfit-style-btn', 'outfit', v => { C().outfit = v; });
+    bindRow('.cape-style-btn', 'cape', v => { C().capeStyle = v; });
+    bindRow('.offhand-style-btn', 'offhand', v => { C().offhand = v; });
     document.querySelectorAll('.swatches').forEach(row => row.querySelectorAll('.color-swatch').forEach(s => s.addEventListener('click', () => {
-      row.querySelectorAll('.color-swatch').forEach(x => x.setAttribute('aria-pressed', String(x === s))); c[row.dataset.key] = s.dataset.val;
+      row.querySelectorAll('.color-swatch').forEach(x => x.setAttribute('aria-pressed', String(x === s))); C()[row.dataset.key] = s.dataset.val;
     })));
     $('btn-bind-sanctuary').addEventListener('click', () => {
-      p.name = ($('input-char-name').value || '').trim().slice(0, 18) || 'Valerius';
+      const p = this.player;
+      p.name = ($('input-char-name').value || '').replace(/[\u0000-\u001F\u007F<>]/g, '').trim().slice(0, 18) || 'Valerius';
       const first = !p.vesselBound; p.vesselBound = true;
       this.switchScreen('HAVEN');
       if (first) this.say(this.t('Welcome to the Haven, {name}. The hearth fires burn low, and the blight presses against the boundary gates. Torben, Vaelin, Pip and Isla await.'));
     });
     $('btn-revisit-sanctuary').addEventListener('click', () => this.switchScreen('SANCTUARY'));
+    $('btn-title-continue').addEventListener('click', () => this.titleContinue());
+    $('btn-title-new').addEventListener('click', () => this.titleNewGame());
+    $('btn-title-delete').addEventListener('click', () => this.titleDelete());
+    $('btn-title-codes').addEventListener('click', () => this.openSaveMenu());
+    $('btn-save-menu').addEventListener('click', () => this.openSaveMenu());
+    $('btn-close-save').addEventListener('click', () => { $('save-modal').classList.remove('open'); });
+    $('btn-copy-code').addEventListener('click', () => this.copySaveCode());
+    $('btn-import-code').addEventListener('click', () => this.importSaveCode());
+    $('btn-save-to-title').addEventListener('click', () => this.returnToTitle());
+    $('btn-ask-yes').addEventListener('click', () => this.answerAsk(true));
+    $('btn-ask-no').addEventListener('click', () => this.answerAsk(false));
     $('btn-open-worldmap').addEventListener('click', () => this.switchScreen('WORLDMAP'));
     $('btn-return-haven').addEventListener('click', () => this.switchScreen('HAVEN'));
     $('btn-forge').addEventListener('click', () => this.openShop('forge'));
@@ -1534,18 +1921,16 @@ class GameEngine {
     $('btn-confirm-yes').addEventListener('click', () => this.confirmRetreat(true));
     $('btn-confirm-no').addEventListener('click', () => this.confirmRetreat(false));
     $('btn-dismiss-dialog').addEventListener('click', () => this.dismissToast());
-    $('btn-hide-narration').addEventListener('click', () => { const n = $('combat-narration'); n.classList.toggle('collapsed'); $('btn-hide-narration').setAttribute('aria-label', n.classList.contains('collapsed') ? 'Show narration' : 'Hide narration'); AudioSys.silence(); });
+    $('btn-hide-narration').addEventListener('click', () => { $('combat-narration').classList.toggle('collapsed'); this.syncNarrationBtn(); AudioSys.silence(); this.patchSavedSettings(); });
     $('btn-collect-spoils').addEventListener('click', () => this.switchScreen('WORLDMAP'));
     $('btn-victory-haven').addEventListener('click', () => this.switchScreen('HAVEN'));
     $('btn-defeat-haven').addEventListener('click', () => { this.switchScreen('HAVEN'); this.say(this.t('{name} wakes by the hearth. Every wound is tended. The blight is waiting.')); });
-    $('btn-voice').addEventListener('click', () => {
-      AudioSys.voice = !AudioSys.voice; const b = $('btn-voice');
-      b.setAttribute('aria-pressed', String(AudioSys.voice)); b.textContent = AudioSys.voice ? '🔊 Voice: On' : '🔇 Voice: Off';
-      if (!AudioSys.voice) AudioSys.silence();
-    });
-    document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', ev => { if (ev.target === m) { if (m.id === 'confirm-modal') this.confirmRetreat(false); else m.classList.remove('open'); } }));
+    $('btn-voice').addEventListener('click', () => { this.setVoice(!AudioSys.voice); this.patchSavedSettings(); });
+    document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', ev => { if (ev.target === m) { if (m.id === 'confirm-modal') this.confirmRetreat(false); else if (m.id === 'ask-modal') this.answerAsk(false); else m.classList.remove('open'); } }));
     document.addEventListener('keydown', ev => {
       if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
+      if ($('ask-modal').classList.contains('open')) { if (ev.key === 'Escape') { ev.preventDefault(); this.answerAsk(false); } return; }
+      if ($('save-modal').classList.contains('open')) { if (ev.key === 'Escape') { ev.preventDefault(); $('save-modal').classList.remove('open'); } return; }
       const tag = ev.target && ev.target.tagName; if (tag === 'INPUT' || tag === 'TEXTAREA') return;
       const k = ev.key;
       if ($('confirm-modal').classList.contains('open')) { if (k === 'Escape') { ev.preventDefault(); this.confirmRetreat(false); } return; }
@@ -1605,6 +1990,9 @@ class GameEngine {
         ctx.fillStyle = f.color; ctx.strokeStyle = '#000'; ctx.lineWidth = 4; ctx.strokeText(f.text, f.x, f.y); ctx.fillText(f.text, f.x, f.y); ctx.restore();
       });
       ctx.restore();
+    } else if (this.gameState === 'TITLE' && this.titleHero) {
+      const tc = this.titleCtx; tc.clearRect(0, 0, this.titleCanvas.width, this.titleCanvas.height);
+      this.renderPaperdoll(tc, 100, 150, 1.6, this.freshAnim(1), this.titleHero.cosmetics, null, this.titleHero.vocation);
     } else if (this.gameState === 'SANCTUARY') {
       const pc = this.previewCtx; pc.clearRect(0, 0, this.previewCanvas.width, this.previewCanvas.height);
       this.renderPaperdoll(pc, 140, 210, 2.0, this.freshAnim(1), this.player.cosmetics, null, this.player.vocation);
@@ -1617,7 +2005,7 @@ class GameEngine {
   }
 }
 
-window.addEventListener('DOMContentLoaded', () => { window.AethelgardEngine = new GameEngine(); });
+window.addEventListener('DOMContentLoaded', () => { window.AethelgardEngine = new GameEngine(); window.AethelgardSave = { KEY: SAVE_KEY, VERSION: SAVE_VERSION, PREFIX: CODE_PREFIX, codec: SaveCodec, sanitize: sanitizeSave, store: SaveStore }; });
 </script>
 </body>
 </html>
