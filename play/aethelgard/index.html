@@ -556,7 +556,7 @@ const CLASSES = {
   ROGUE: {
     label: 'Rogue', weapon: 'daggers', weaponName: 'daggers', strikeName: 'Quick Strike', artsName: 'Shadow Arts', mpRegen: 4, mainStat: 'dex',
     base: { maxHp: 110, maxMp: 60, str: 13, int: 10, dex: 20, end: 10 }, grow: { maxHp: 12, maxMp: 6, str: 2, int: 1, dex: 3, end: 1 },
-    look: { outfit: 'leathers', offhand: 'buckler', capeStyle: 'none' }, aura: '#A29BFE',
+    look: { outfit: 'leathers', offhand: 'gauntlet', capeStyle: 'none' }, aura: '#A29BFE',
     blurb: 'Fast and hard to pin down. Dodges blows, lands critical hits, and strikes several times a turn.',
     abilities: [
       { id: 'twin_fangs', name: 'Twin Fangs', element: 'PHYS', cost: 6, kind: 'attack', scale: 'dex', k: 0.6, kStr: 0.8, flat: 0, hits: 2, crit: true, desc: 'Two quick cuts, each able to crit.' },
@@ -707,10 +707,18 @@ const AssetRegistry = {
         ctx.fillStyle = '#ECF0F1'; ctx.beginPath(); ctx.arc(0, -32, 14, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#74B9FF'; ctx.fillRect(-6, -34, 4, 4); ctx.fillRect(2, -34, 4, 4);
         ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(-10, -42); ctx.lineTo(-18, -55); ctx.moveTo(10, -42); ctx.lineTo(18, -55); ctx.stroke();
-        ctx.save(); ctx.translate(18, 5); ctx.rotate(a.weaponRot || 0); ctx.fillStyle = '#95A5A6'; ctx.fillRect(-3, -40, 6, 60); ctx.fillStyle = '#C0392B'; ctx.fillRect(-6, -10, 12, 5); ctx.restore();
-        ctx.save(); ctx.translate(-16, 5); if (a.state === 'BLOCK') { ctx.translate(14, -8); ctx.rotate(0.3); }
+        // sword arm: bony arm from the shoulder, fist closed on the grip, blade rising out of the fist toward the foe
+        const swing = a.weaponRot || 0, hx = 20 + swing * 6, hy = 4 - swing * 10;
+        ctx.save(); ctx.lineCap = 'round'; ctx.strokeStyle = '#BDC3C7'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(10, -16); ctx.lineTo(16, -4 - swing * 6); ctx.lineTo(hx, hy); ctx.stroke(); ctx.restore();
+        ctx.save(); ctx.translate(hx, hy); ctx.rotate(0.35 + swing);
+        ctx.fillStyle = '#5D4037'; ctx.fillRect(-2, -4, 4, 12); ctx.fillStyle = '#C0392B'; ctx.fillRect(-8, -8, 16, 4);
+        ctx.fillStyle = '#AEB6BF'; ctx.beginPath(); ctx.moveTo(-3.5, -8); ctx.lineTo(3.5, -8); ctx.lineTo(2.5, -50); ctx.lineTo(0, -58); ctx.lineTo(-2.5, -50); ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = '#74B9FF'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore();
+        ctx.fillStyle = '#ECF0F1'; ctx.beginPath(); ctx.arc(hx, hy, 4.5, 0, Math.PI * 2); ctx.fill();
+        // shield on the near arm, carried in front of the body (raised when bracing)
+        ctx.save(); ctx.translate(6, 4); if (a.state === 'BLOCK') { ctx.translate(6, -10); ctx.rotate(0.15); }
         ctx.fillStyle = '#2C3E50'; ctx.beginPath(); ctx.moveTo(-10, -18); ctx.lineTo(10, -18); ctx.lineTo(8, 20); ctx.lineTo(0, 26); ctx.lineTo(-8, 20); ctx.closePath(); ctx.fill();
-        ctx.strokeStyle = '#74B9FF'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
+        ctx.strokeStyle = '#74B9FF'; ctx.lineWidth = 2; ctx.stroke(); ctx.fillStyle = '#74B9FF'; ctx.beginPath(); ctx.arc(0, 0, 3.5, 0, Math.PI * 2); ctx.fill(); ctx.restore();
       }
     },
     cinder_colossus: {
@@ -818,8 +826,8 @@ class GameEngine {
     this.timers.add(id);
   }
   cancelTimers() { this.timers.forEach(clearTimeout); this.timers.clear(); this.combatGen++; }
-  freshAnim(facing) { return { state: 'IDLE', timer: 0, xOffset: 0, yOffset: 0, bodyAngle: 0, weaponRot: 0, rot: 0, alpha: 1, flashRed: 0, facing }; }
-  resetAnim(a) { Object.assign(a, { state: 'IDLE', timer: 0, xOffset: 0, yOffset: 0, bodyAngle: 0, weaponRot: 0, rot: 0, alpha: 1, flashRed: 0 }); }
+  freshAnim(facing) { return { state: 'IDLE', timer: 0, xOffset: 0, yOffset: 0, bodyAngle: 0, weaponRot: 0, rot: 0, alpha: 1, flashRed: 0, cast: false, castColor: null, facing }; }
+  resetAnim(a) { Object.assign(a, { state: 'IDLE', timer: 0, xOffset: 0, yOffset: 0, bodyAngle: 0, weaponRot: 0, rot: 0, alpha: 1, flashRed: 0, cast: false, castColor: null }); }
   expNeeded(level = this.player.level) { return 100 * level; }
   critChance() { return 0.05 + this.player.dex * 0.005 + (this.player.relics.amulet ? 0.08 : 0); }
   dodgeChance() { return this.player.vocation === 'ROGUE' ? this.player.dex * 0.008 : 0; }
@@ -870,103 +878,217 @@ class GameEngine {
   triggerShake(n = 12) { if (!REDUCED) this.screenShake = n; }
 
   // ----- paperdoll (the hero) -----
+  // ----- hero rig -----
+  // Side-on rig facing +x (toward the foe). The near arm is the hero's right (weapon) arm,
+  // the far arm is the left (off-hand) arm. Joints are solved with two-bone IK from a pose table.
+  static ik(ax, ay, bx, by, l1, l2, bend) {
+    let dx = bx - ax, dy = by - ay, d = Math.hypot(dx, dy) || 0.001;
+    const reach = l1 + l2 - 0.01; if (d > reach) { bx = ax + dx / d * reach; by = ay + dy / d * reach; d = reach; }
+    d = Math.max(d, Math.abs(l1 - l2) + 0.01);
+    const a = Math.acos(Math.max(-1, Math.min(1, (l1 * l1 + d * d - l2 * l2) / (2 * l1 * d))));
+    const base = Math.atan2(by - ay, bx - ax) + bend * a;
+    return { jx: ax + Math.cos(base) * l1, jy: ay + Math.sin(base) * l1, ex: bx, ey: by };
+  }
+  heroPose(anim, voc) {
+    // n = near (weapon) hand, f = far (off) hand, a = weapon angle (0 = straight up, + = tipped toward the foe),
+    // ft/bk = front/back foot x, lean = upper-body lean toward the foe.
+    const TABLE = {
+      WARRIOR: {
+        idle:   { n: [17, 2],   na: 0.55, f: [17, -4],  fa: 0.9, ft: 13, bk: -13, lean: 0 },
+        windup: { n: [-3, -37], na: -0.55, f: [19, -8], fa: 0.9, ft: 17, bk: -17, lean: -0.04 },
+        strike: { n: [31, -4],  na: 1.75, f: [5, 0],    fa: 0.9, ft: 21, bk: -19, lean: 0.14 },
+        cast:   { n: [11, -31], na: 0.1,  f: [16, -4],  fa: 0.9, ft: 15, bk: -15, lean: -0.03 },
+        release:{ n: [30, -8],  na: 1.5,  f: [6, 0],    fa: 0.9, ft: 21, bk: -19, lean: 0.12 },
+        block:  { n: [7, -1],   na: 0.15, f: [23, -15], fa: 0.9, ft: 14, bk: -18, lean: -0.03 },
+        recoil: { n: [9, 9],    na: 1.05, f: [9, -2],   fa: 0.9, ft: 7,  bk: -15, lean: -0.12 }
+      },
+      MAGE: {
+        idle:   { n: [16, -2],  na: 0.06, f: [9, 6],    fa: 0.9, ft: 11, bk: -11, lean: 0 },
+        windup: { n: [2, -31],  na: -0.7, f: [12, 2],   fa: 0.9, ft: 15, bk: -15, lean: -0.04 },
+        strike: { n: [28, -9],  na: 1.3,  f: [8, 4],    fa: 0.9, ft: 19, bk: -17, lean: 0.12 },
+        cast:   { n: [24, -13], na: 0.42, f: [25, -1],  fa: 0.9, ft: 15, bk: -15, lean: 0.05 },
+        release:{ n: [30, -16], na: 0.62, f: [30, -3],  fa: 0.9, ft: 18, bk: -17, lean: 0.1 },
+        block:  { n: [16, -4],  na: 0.5,  f: [25.6, -21.5], fa: 0.9, ft: 13, bk: -17, lean: -0.03 },
+        recoil: { n: [8, 7],    na: -0.25, f: [6, 2],   fa: 0.9, ft: 7,  bk: -14, lean: -0.12 }
+      },
+      ROGUE: {
+        idle:   { n: [17, 2],   na: 1.15, f: [20, -9],  fa: 0.85, ft: 15, bk: -15, lean: 0.06 },
+        windup: { n: [1, -20],  na: 0.3,  f: [13, 4],   fa: 1.4,  ft: 18, bk: -18, lean: 0.02 },
+        strike: { n: [32, -5],  na: 1.55, f: [11, 1],   fa: 1.2,  ft: 22, bk: -20, lean: 0.16 },
+        cast:   { n: [17, 2],   na: 1.15, f: [20, -9],  fa: 0.85, ft: 15, bk: -15, lean: 0.06 },
+        release:{ n: [32, -5],  na: 1.55, f: [11, 1],   fa: 1.2,  ft: 22, bk: -20, lean: 0.16 },
+        block:  { n: [19, -11], na: 0.5,  f: [19, -12], fa: -0.5, ft: 14, bk: -17, lean: -0.02 },
+        recoil: { n: [8, 8],    na: 1.3,  f: [7, 0],    fa: 1.0,  ft: 7,  bk: -15, lean: -0.12 }
+      }
+    };
+    const T = TABLE[voc] || TABLE.WARRIOR;
+    const ease = k => k * k * (3 - 2 * k);
+    const mix = (A, B, k) => { k = ease(Math.max(0, Math.min(1, k))); const o = {}; for (const key in A) o[key] = Array.isArray(A[key]) ? [A[key][0] + (B[key][0] - A[key][0]) * k, A[key][1] + (B[key][1] - A[key][1]) * k] : A[key] + (B[key] - A[key]) * k; return o; };
+    const t = anim.timer || 0;
+    switch (anim.state) {
+      case 'LUNGE': return mix(T.idle, T.windup, t / 0.28);
+      case 'SWING': return anim.cast ? mix(T.cast, T.release, t / 0.1) : mix(T.windup, T.strike, t / 0.1);
+      case 'CAST': return mix(T.idle, T.cast, t / 0.15);
+      case 'BLOCK': return mix(T.idle, T.block, t / 0.08);
+      case 'RECOIL': case 'DEFEAT': return T.recoil;
+      default: return T.idle;
+    }
+  }
+  drawWeapon(ctx, kind, x, y, ang, glow) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(ang); // local -y = blade/shaft direction
+    if (kind === 'sword') {
+      ctx.fillStyle = '#5D4037'; ctx.fillRect(-2.5, -6, 5, 14);                     // leather grip (the fist covers it)
+      ctx.fillStyle = '#D4AF37'; ctx.beginPath(); ctx.arc(0, 10, 3.8, 0, Math.PI * 2); ctx.fill(); // pommel
+      ctx.fillRect(-13, -10, 26, 4);                                                  // crossguard
+      ctx.fillStyle = '#E0E1DD'; ctx.beginPath(); ctx.moveTo(-4.5, -10); ctx.lineTo(4.5, -10); ctx.lineTo(3.5, -70); ctx.lineTo(0, -80); ctx.lineTo(-3.5, -70); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = glow || '#2980B9'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.strokeStyle = 'rgba(41,128,185,.55)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, -12); ctx.lineTo(0, -66); ctx.stroke(); // fuller
+    } else if (kind === 'staff') {
+      ctx.fillStyle = '#6D4C41'; ctx.fillRect(-2.5, -72, 5, 136);                    // shaft, gripped at chest height; the foot reaches the ground
+      ctx.fillStyle = '#4E342E'; ctx.fillRect(-3, 60, 6, 5);                          // iron-shod foot
+      ctx.fillStyle = '#D4AF37'; ctx.fillRect(-6, -76, 12, 5);                        // orb cradle
+      ctx.beginPath(); ctx.moveTo(-6, -76); ctx.lineTo(-8, -88); ctx.lineTo(-4, -78); ctx.moveTo(6, -76); ctx.lineTo(8, -88); ctx.lineTo(4, -78); ctx.fill();
+      const pulse = REDUCED ? 1 : 0.85 + Math.sin(this.time * 5) * 0.15;
+      ctx.shadowColor = glow || '#74B9FF'; ctx.shadowBlur = 16 * pulse; ctx.fillStyle = glow || '#74B9FF';
+      ctx.beginPath(); ctx.arc(0, -85, 8.5 * pulse, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+    } else if (kind === 'dagger') {
+      ctx.fillStyle = '#3E2723'; ctx.fillRect(-2, -4, 4, 10);                         // grip
+      ctx.fillStyle = '#D4AF37'; ctx.fillRect(-7, -7, 14, 3); ctx.beginPath(); ctx.arc(0, 7, 2.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#C7CED6'; ctx.beginPath(); ctx.moveTo(-3.5, -7); ctx.lineTo(3.5, -7); ctx.lineTo(1.5, -32); ctx.lineTo(0, -38); ctx.lineTo(-1.5, -32); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#A29BFE'; ctx.lineWidth = 1.1; ctx.stroke();
+    }
+    ctx.restore();
+  }
   renderPaperdoll(ctx, x, y, scale, anim, cos, targetX, vocation) {
     ctx.save();
     const dir = targetX ? (targetX >= x ? 1 : -1) : anim.facing;
-    const bob = REDUCED ? 0 : Math.sin(this.time * 4) * 2;
-    ctx.translate(x + anim.xOffset, y + anim.yOffset + bob);
-    ctx.scale(scale * dir, scale); ctx.rotate(anim.bodyAngle);
+    const fallK = anim.state === 'DEFEAT' ? Math.min(1, (anim.timer || 0) / 0.6) : 0;
+    const bob = REDUCED || fallK ? 0 : Math.sin(this.time * 4) * 1.6;
+    ctx.translate(x + anim.xOffset, y + anim.yOffset);
+    ctx.scale(scale * dir, scale);
+    ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(-2, 70, 30, 6, 0, 0, Math.PI * 2); ctx.fill(); // ground shadow
+    const kind = vocation === 'MAGE' ? 'staff' : vocation === 'ROGUE' ? 'dagger' : 'sword';
+    const dropped = fallK > 0.35; // the weapon slips from the hand and lands on the ground in front
+    if (dropped) {
+      ctx.save(); ctx.globalAlpha = Math.min(1, (fallK - 0.35) * 4);
+      if (kind === 'staff') this.drawWeapon(ctx, 'staff', 8, 66, Math.PI / 2, null);
+      else this.drawWeapon(ctx, kind, 26, 66, Math.PI / 2 + 0.05, null);
+      if (kind === 'dagger' && cos.offhand === 'gauntlet') this.drawWeapon(ctx, 'dagger', 44, 67, Math.PI / 2 - 0.25, null);
+      ctx.restore();
+    }
+    if (fallK) { ctx.translate(-6, 70); ctx.rotate(-fallK * 1.45); ctx.translate(6, -70); } // topple backwards about the heels
     if (anim.flashRed > 0) ctx.filter = 'drop-shadow(0 0 12px #C0392B) brightness(1.7)';
     const { skinColor, hairColor, hairStyle, eyeColor, faceMark, outfit, capeStyle, offhand } = cos;
-    const sway = REDUCED ? 0 : Math.sin(this.time * 2.8) * 0.1;
+    const pose = this.heroPose(anim, vocation);
+    const sway = REDUCED ? 0 : Math.sin(this.time * 2.8);
+    const IK = GameEngine.ik, GROUND = 70;
+    // Upper body leans about the hips; legs stay planted.
+    const lean = pose.lean + (anim.bodyAngle || 0) * 0.6;
+    const hip = { x: 0, y: 22 };
+    const up = (px, py) => { const dx = px - hip.x, dy = py - hip.y + bob, c = Math.cos(lean), s = Math.sin(lean); return [hip.x + dx * c - dy * s, hip.y + dx * s + dy * c]; };
+    const seg = (ax, ay, bx, by, w, col, edge) => { ctx.lineCap = 'round'; ctx.strokeStyle = edge; ctx.lineWidth = w + 3; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke(); ctx.strokeStyle = col; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke(); };
+    const EDGE = '#070D16';
+    const sleeveNear = outfit === 'robes' ? '#1F5F8B' : outfit === 'leathers' ? '#5D4037' : '#415A77';
+    const sleeveFar = outfit === 'robes' ? '#154360' : outfit === 'leathers' ? '#3E2723' : '#1B263B';
+    const legNear = outfit === 'tunic' ? '#4A3728' : '#1B263B', legFar = outfit === 'tunic' ? '#33261B' : '#0D1B2A';
+    const capeCol = outfit === 'robes' ? '#2C3E50' : '#641E16';
+
     if (vocation === 'MAGE') { // arcane aura
-      const g = ctx.createRadialGradient(0, 0, 4, 0, 0, 70); g.addColorStop(0, 'rgba(116,185,255,.22)'); g.addColorStop(1, 'rgba(116,185,255,0)');
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 70, 0, Math.PI * 2); ctx.fill();
+      const [ax, ay] = up(2, -6);
+      const g = ctx.createRadialGradient(ax, ay, 4, ax, ay, 72); g.addColorStop(0, 'rgba(116,185,255,.22)'); g.addColorStop(1, 'rgba(116,185,255,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(ax, ay, 72, 0, Math.PI * 2); ctx.fill();
     }
+    // 1) cape: fastened across both shoulders at the neck, hanging down the back
     if (capeStyle !== 'none') {
-      ctx.save(); ctx.translate(-2, -10); ctx.rotate(sway - (anim.state === 'LUNGE' ? 0.3 : 0));
-      ctx.fillStyle = outfit === 'robes' ? '#2C3E50' : '#641E16';
-      ctx.beginPath(); ctx.moveTo(-15, 0); ctx.lineTo(15, 0);
-      if (capeStyle === 'tattered') { ctx.lineTo(22, 70); ctx.lineTo(12, 62); ctx.lineTo(4, 76); ctx.lineTo(-6, 64); ctx.lineTo(-14, 78); ctx.lineTo(-22, 66); }
-      else { ctx.lineTo(25, 80); ctx.lineTo(-25, 80); }
-      ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = 1.5; ctx.stroke(); ctx.restore();
+      const moving = anim.state === 'LUNGE' || anim.state === 'SWING' || anim.state === 'RECOIL';
+      const flow = sway * 3 - (moving ? 12 : 0);
+      const [l0x, l0y] = up(-9, -25), [r0x, r0y] = up(6, -25), [mx, my] = up(-13, 8);
+      ctx.fillStyle = capeCol; ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(r0x, r0y);
+      ctx.quadraticCurveTo(mx + 14, my, 0 + flow * 0.4, GROUND - 12);
+      if (capeStyle === 'tattered') {
+        const bx0 = flow * 0.4, bx1 = -26 + flow;
+        [[0.2, 6], [0.4, -2], [0.6, 8], [0.8, -1]].forEach(([k, dy]) => ctx.lineTo(bx0 + (bx1 - bx0) * k, GROUND - 12 + dy));
+        ctx.lineTo(bx1, GROUND - 8);
+      } else ctx.lineTo(-27 + flow, GROUND - 10);
+      ctx.quadraticCurveTo(mx - 10 + flow * 0.5, my, l0x, l0y);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
     }
-    // back arm + off-hand
-    ctx.save(); ctx.translate(-14, -8);
-    if (anim.state === 'BLOCK') { ctx.translate(10, -10); ctx.rotate(-0.8); }
-    ctx.fillStyle = outfit === 'robes' ? '#1B4F72' : (outfit === 'leathers' ? '#3E2723' : '#1B263B'); ctx.fillRect(-6, 0, 12, 34);
-    ctx.fillStyle = skinColor; ctx.beginPath(); ctx.arc(0, 36, 6, 0, Math.PI * 2); ctx.fill();
-    if (offhand === 'shield') {
-      ctx.save(); ctx.translate(4, 26); ctx.fillStyle = '#0D1B2A';
-      ctx.beginPath(); ctx.moveTo(-14, -20); ctx.lineTo(14, -20); ctx.lineTo(12, 24); ctx.lineTo(0, 34); ctx.lineTo(-12, 24); ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = 2.5; ctx.stroke(); ctx.fillStyle = '#C0392B'; ctx.beginPath(); ctx.arc(0, 4, 7, 0, Math.PI * 2); ctx.fill(); ctx.restore();
-    } else if (offhand === 'buckler') {
-      ctx.save(); ctx.translate(2, 28); ctx.fillStyle = '#2C3E50'; ctx.beginPath(); ctx.arc(0, 0, 14, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = 2.5; ctx.stroke(); ctx.restore();
-    } else if (vocation === 'ROGUE') { // bare off-hand: a second dagger
-      ctx.save(); ctx.translate(0, 36); ctx.rotate(Math.PI / 3); ctx.fillStyle = '#D4AF37'; ctx.fillRect(-2, -4, 4, 8);
-      ctx.fillStyle = '#C7CED6'; ctx.beginPath(); ctx.moveTo(-3, -4); ctx.lineTo(0, -30); ctx.lineTo(3, -4); ctx.closePath(); ctx.fill(); ctx.restore();
-    }
-    ctx.restore();
-    // legs
-    ctx.save(); ctx.translate(-8, 22); ctx.fillStyle = outfit === 'tunic' ? '#4A3728' : '#0D1B2A'; ctx.fillRect(-7, 0, 14, 45); ctx.fillStyle = '#D4AF37'; ctx.fillRect(-8, 38, 16, 8); ctx.restore();
-    // torso
-    ctx.save();
-    if (outfit === 'plate') {
-      ctx.fillStyle = '#1B263B'; ctx.beginPath(); ctx.moveTo(-16, -25); ctx.lineTo(16, -25); ctx.lineTo(12, 25); ctx.lineTo(-12, 25); ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = 2; ctx.stroke(); ctx.fillStyle = '#D4AF37'; ctx.beginPath(); ctx.arc(0, -2, 6, 0, Math.PI * 2); ctx.fill();
-    } else if (outfit === 'tunic') {
-      ctx.fillStyle = '#2C3E50'; ctx.fillRect(-14, -25, 28, 50); ctx.fillStyle = '#8D5524'; ctx.fillRect(-15, 2, 30, 8);
-    } else if (outfit === 'robes') {
-      ctx.fillStyle = '#1B4F72'; ctx.beginPath(); ctx.moveTo(-16, -25); ctx.lineTo(16, -25); ctx.lineTo(20, 32); ctx.lineTo(-20, 32); ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = 2; ctx.stroke();
-    } else if (outfit === 'leathers') {
-      ctx.fillStyle = '#3E2723'; ctx.fillRect(-14, -25, 28, 50); ctx.strokeStyle = '#6D4C41'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-14, -20); ctx.lineTo(14, 10); ctx.stroke();
-    }
-    ctx.restore();
-    ctx.save(); ctx.translate(8, 22); ctx.fillStyle = outfit === 'tunic' ? '#3E2723' : '#1B263B'; ctx.fillRect(-8, 0, 16, 48);
-    ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = 1.5; ctx.strokeRect(-8, 0, 16, 48); ctx.fillStyle = '#D4AF37'; ctx.fillRect(-9, 42, 20, 9); ctx.restore();
-    // head
-    ctx.save(); ctx.translate(0, -32);
-    if (hairStyle === 'braids') { // braids hang behind the head
-      ctx.fillStyle = hairColor;
-      for (const bx of [-13, 9]) { for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.ellipse(bx, 8 + i * 9, 4.5, 5.5, 0, 0, Math.PI * 2); ctx.fill(); } }
-    }
-    ctx.fillStyle = skinColor; ctx.beginPath(); ctx.arc(0, 0, 14, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#FFF'; ctx.fillRect(2, -4, 7, 5); ctx.fillStyle = eyeColor; ctx.fillRect(5, -3, 4, 4);
-    if (faceMark === 'scar') { ctx.strokeStyle = '#962D22'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(4, -9); ctx.lineTo(7, 3); ctx.stroke(); }
-    else if (faceMark === 'paint') { ctx.fillStyle = '#2980B9'; ctx.fillRect(1, 2, 8, 2); }
-    else if (faceMark === 'rune') { ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = 1.5; ctx.strokeRect(3, -1, 5, 5); }
-    if (vocation === 'ROGUE') { ctx.fillStyle = '#1E1B2E'; ctx.beginPath(); ctx.moveTo(-14, 3); ctx.lineTo(15, 3); ctx.lineTo(12, 12); ctx.lineTo(-10, 13); ctx.closePath(); ctx.fill(); }
-    ctx.fillStyle = hairColor;
-    if (hairStyle === 'spiky') { ctx.beginPath(); ctx.moveTo(-16, -6); ctx.lineTo(-24, -24); ctx.lineTo(0, -32); ctx.lineTo(24, -18); ctx.lineTo(16, 0); ctx.closePath(); ctx.fill(); }
-    else if (hairStyle === 'flowing') { ctx.beginPath(); ctx.arc(0, -6, 16, Math.PI, Math.PI * 2); ctx.lineTo(16, 12); ctx.lineTo(-18, 22); ctx.lineTo(-17, -2); ctx.closePath(); ctx.fill(); }
-    else if (hairStyle === 'topknot') {
-      ctx.beginPath(); ctx.arc(0, -5, 15, Math.PI, Math.PI * 2); ctx.lineTo(15, -2); ctx.lineTo(-15, -2); ctx.closePath(); ctx.fill();
-      ctx.beginPath(); ctx.arc(-3, -22, 7, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = '#C0392B'; ctx.fillRect(-8, -17, 10, 3);
-    } else if (hairStyle === 'short') { ctx.beginPath(); ctx.arc(0, -3, 14.5, Math.PI * 1.02, Math.PI * 1.98); ctx.lineTo(9, -9); ctx.lineTo(-14, -2); ctx.closePath(); ctx.fill(); }
-    else if (hairStyle === 'braids') { ctx.beginPath(); ctx.arc(0, -5, 15.5, Math.PI, Math.PI * 2); ctx.lineTo(15, 0); ctx.lineTo(0, -8); ctx.lineTo(-15, 2); ctx.closePath(); ctx.fill(); }
-    ctx.restore();
-    // weapon arm
-    ctx.save(); ctx.translate(14, -8); ctx.rotate(anim.weaponRot);
-    ctx.fillStyle = outfit === 'robes' ? '#1B4F72' : '#415A77'; ctx.fillRect(-6, 0, 12, 34);
-    ctx.fillStyle = skinColor; ctx.beginPath(); ctx.arc(0, 36, 7, 0, Math.PI * 2); ctx.fill();
-    ctx.save(); ctx.translate(2, 36);
-    if (vocation === 'MAGE') {
-      ctx.rotate(-Math.PI / 10); ctx.fillStyle = '#6D4C41'; ctx.fillRect(-2.5, -78, 5, 104);
-      ctx.fillStyle = '#D4AF37'; ctx.fillRect(-6, -80, 12, 5);
-      const pulse = REDUCED ? 1 : 0.8 + Math.sin(this.time * 5) * 0.2;
-      ctx.shadowColor = '#74B9FF'; ctx.shadowBlur = 16 * pulse; ctx.fillStyle = '#74B9FF'; ctx.beginPath(); ctx.arc(0, -88, 9 * pulse, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
-    } else if (vocation === 'ROGUE') {
-      ctx.rotate(-Math.PI / 3); ctx.fillStyle = '#D4AF37'; ctx.fillRect(-3, -5, 6, 10); ctx.fillRect(-9, -2, 18, 3);
-      ctx.fillStyle = '#C7CED6'; ctx.beginPath(); ctx.moveTo(-4, -5); ctx.lineTo(0, -40); ctx.lineTo(4, -5); ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = '#A29BFE'; ctx.lineWidth = 1.2; ctx.stroke();
+    // 2) far (left) leg, then near (right) leg: hips over a staggered, weight-spread stance
+    const drawLeg = (hx, footX, col, bootCol) => {
+      const k = IK(hx, hip.y, footX, GROUND - 5, 25, 24, -1);
+      seg(hx, hip.y, k.jx, k.jy, 12, col, EDGE); seg(k.jx, k.jy, k.ex, k.ey, 11, col, EDGE);
+      ctx.fillStyle = bootCol; ctx.strokeStyle = EDGE; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(k.ex - 6, k.ey - 6); ctx.lineTo(k.ex + 5, k.ey - 6); ctx.lineTo(k.ex + 11, k.ey + 1); ctx.lineTo(k.ex + 11, GROUND); ctx.lineTo(k.ex - 7, GROUND); ctx.closePath(); ctx.fill(); ctx.stroke();
+    };
+    drawLeg(-3, pose.bk, legFar, '#A8892C');
+    drawLeg(3, pose.ft, legNear, '#D4AF37');
+    // 3) far (left) arm: shoulder sits just behind the near one
+    const fS = up(-2, -19), nS = up(4, -19);
+    const fH = up(pose.f[0], pose.f[1]), nH = up(pose.n[0], pose.n[1]);
+    const fa = IK(fS[0], fS[1], fH[0], fH[1], 18, 18, 1);
+    seg(fS[0], fS[1], fa.jx, fa.jy, 10, sleeveFar, EDGE); seg(fa.jx, fa.jy, fa.ex, fa.ey, 9, sleeveFar, EDGE);
+    const farItem = offhand === 'shield' || offhand === 'buckler' ? offhand : vocation === 'ROGUE' ? 'dagger' : null;
+    const farFist = () => { ctx.fillStyle = skinColor; ctx.strokeStyle = EDGE; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(fa.ex, fa.ey, 5.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); };
+    if (!farItem) farFist();
+    // 4) torso (profile, chest toward the foe)
+    ctx.save(); ctx.translate(hip.x, hip.y + bob); ctx.rotate(lean); ctx.translate(-hip.x, -hip.y);
+    const body = () => { ctx.beginPath(); ctx.moveTo(-10, -25); ctx.lineTo(10, -25); ctx.quadraticCurveTo(17, -14, 14, -2); ctx.lineTo(11, 24); ctx.lineTo(-10, 24); ctx.quadraticCurveTo(-14, 0, -10, -25); ctx.closePath(); };
+    if (outfit === 'robes') {
+      ctx.fillStyle = '#1B4F72'; ctx.beginPath(); ctx.moveTo(-10, -25); ctx.lineTo(10, -25); ctx.quadraticCurveTo(17, -14, 14, -2); ctx.lineTo(21, 50); ctx.lineTo(-20, 50); ctx.quadraticCurveTo(-14, 0, -10, -25); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = 2; ctx.stroke(); ctx.fillStyle = '#D4AF37'; ctx.fillRect(-12, 16, 26, 4);
+      ctx.strokeStyle = 'rgba(212,175,55,.6)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(11, -20); ctx.lineTo(16, 48); ctx.stroke();
     } else {
-      ctx.rotate(-Math.PI / 4); ctx.fillStyle = '#D4AF37'; ctx.fillRect(-4, -6, 8, 12); ctx.fillRect(-14, -2, 28, 4);
-      ctx.fillStyle = '#E0E1DD'; ctx.beginPath(); ctx.moveTo(-5, -6); ctx.lineTo(0, -82); ctx.lineTo(5, -6); ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = '#2980B9'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.fillStyle = outfit === 'plate' ? '#1B263B' : outfit === 'tunic' ? '#2C3E50' : '#3E2723'; body(); ctx.fill();
+      if (outfit === 'plate') { ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = 2; ctx.stroke(); ctx.fillStyle = '#D4AF37'; ctx.beginPath(); ctx.arc(5, -6, 5.5, 0, Math.PI * 2); ctx.fill(); ctx.fillRect(-11, 15, 24, 3); }
+      else if (outfit === 'tunic') { ctx.fillStyle = '#8D5524'; ctx.fillRect(-12, 6, 26, 7); ctx.fillStyle = '#D4AF37'; ctx.fillRect(6, 7, 5, 5); ctx.strokeStyle = EDGE; ctx.lineWidth = 1.5; body(); ctx.stroke(); }
+      else { ctx.strokeStyle = '#8D6E63'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(-9, -22); ctx.lineTo(13, 12); ctx.stroke(); ctx.strokeStyle = EDGE; ctx.lineWidth = 1.5; body(); ctx.stroke(); }
     }
-    ctx.restore(); ctx.restore();
+    // neck
+    ctx.fillStyle = skinColor; ctx.fillRect(-1, -29, 7, 6);
+    // cape mantle over the near shoulder, pinned with a clasp at the collarbone
+    if (capeStyle !== 'none') {
+      ctx.fillStyle = capeCol; ctx.beginPath(); ctx.moveTo(-11, -26); ctx.lineTo(8, -26); ctx.lineTo(4, -17); ctx.lineTo(-9, -14); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = 1.2; ctx.stroke();
+      ctx.fillStyle = '#D4AF37'; ctx.beginPath(); ctx.arc(8, -23, 3, 0, Math.PI * 2); ctx.fill();
+    }
+    // 5) head (profile toward the foe)
+    ctx.translate(3, -40);
+    if (hairStyle === 'braids') { ctx.fillStyle = hairColor; for (const bx of [-12, -5]) for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.ellipse(bx, 9 + i * 9, 4.5, 5.5, 0, 0, Math.PI * 2); ctx.fill(); } }
+    if (hairStyle === 'flowing') { ctx.fillStyle = hairColor; ctx.beginPath(); ctx.moveTo(-14, -4); ctx.quadraticCurveTo(-22, 16, -16 + sway * 1.5, 32); ctx.lineTo(-4, 14); ctx.closePath(); ctx.fill(); }
+    ctx.fillStyle = skinColor; ctx.beginPath(); ctx.arc(0, 0, 14, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(12, -2); ctx.lineTo(17, 3); ctx.lineTo(12, 5); ctx.fill(); // nose
+    ctx.fillStyle = '#FFF'; ctx.fillRect(4, -4, 6, 5); ctx.fillStyle = eyeColor; ctx.fillRect(7, -3, 3, 4);
+    if (fallK > 0.6 || anim.state === 'RECOIL') { ctx.fillStyle = skinColor; ctx.fillRect(4, -5, 7, 3); } // wince
+    if (faceMark === 'scar') { ctx.strokeStyle = '#962D22'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(5, -9); ctx.lineTo(8, 3); ctx.stroke(); }
+    else if (faceMark === 'paint') { ctx.fillStyle = '#2980B9'; ctx.fillRect(2, 2, 9, 2); }
+    else if (faceMark === 'rune') { ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = 1.5; ctx.strokeRect(3, 1, 5, 5); }
+    if (vocation === 'ROGUE') { ctx.fillStyle = '#1E1B2E'; ctx.beginPath(); ctx.moveTo(-13, 3); ctx.lineTo(17, 3); ctx.lineTo(13, 12); ctx.lineTo(-10, 13); ctx.closePath(); ctx.fill(); }
+    ctx.fillStyle = hairColor;
+    if (hairStyle === 'spiky') { ctx.beginPath(); ctx.moveTo(-15, 4); ctx.lineTo(-25, -10); ctx.lineTo(-17, -14); ctx.lineTo(-20, -27); ctx.lineTo(-4, -20); ctx.lineTo(2, -32); ctx.lineTo(9, -18); ctx.lineTo(21, -20); ctx.lineTo(14, -6); ctx.lineTo(6, -9); ctx.lineTo(-6, -6); ctx.lineTo(-10, 2); ctx.closePath(); ctx.fill(); }
+    else if (hairStyle === 'flowing') { ctx.beginPath(); ctx.arc(0, -3, 15.5, Math.PI * 0.95, Math.PI * 1.95); ctx.lineTo(9, -8); ctx.lineTo(-6, -4); ctx.lineTo(-14, 6); ctx.closePath(); ctx.fill(); }
+    else if (hairStyle === 'topknot') {
+      ctx.beginPath(); ctx.arc(0, -3, 15, Math.PI * 0.95, Math.PI * 1.92); ctx.lineTo(8, -7); ctx.lineTo(-14, 0); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.arc(-5, -20, 7, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = '#C0392B'; ctx.fillRect(-10, -15, 10, 3);
+    } else if (hairStyle === 'short') { ctx.beginPath(); ctx.arc(0, -2, 14.5, Math.PI * 0.98, Math.PI * 1.9); ctx.lineTo(9, -9); ctx.lineTo(-5, -6); ctx.lineTo(-14, 2); ctx.closePath(); ctx.fill(); }
+    else if (hairStyle === 'braids') { ctx.beginPath(); ctx.arc(0, -3, 15.5, Math.PI * 0.95, Math.PI * 1.95); ctx.lineTo(10, -7); ctx.lineTo(-3, -6); ctx.lineTo(-15, 4); ctx.closePath(); ctx.fill(); }
+    ctx.restore();
+    // 6) off-hand item on the far arm, in front of the chest
+    if (farItem === 'shield') {
+      ctx.save(); ctx.translate(fa.ex + 3, fa.ey + 2); ctx.rotate(lean * 0.5); ctx.fillStyle = '#0D1B2A';
+      ctx.beginPath(); ctx.moveTo(-13, -22); ctx.lineTo(13, -22); ctx.lineTo(12, 12); ctx.lineTo(0, 26); ctx.lineTo(-12, 12); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = 2.5; ctx.stroke(); ctx.fillStyle = '#C0392B'; ctx.beginPath(); ctx.arc(0, -2, 6.5, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+    } else if (farItem === 'buckler') {
+      ctx.save(); ctx.translate(fa.ex + 3, fa.ey); ctx.fillStyle = '#2C3E50'; ctx.beginPath(); ctx.arc(0, 0, 13, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = 2.5; ctx.stroke(); ctx.fillStyle = '#D4AF37'; ctx.beginPath(); ctx.arc(0, 0, 3.5, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+    } else if (farItem === 'dagger') { if (!dropped) this.drawWeapon(ctx, 'dagger', fa.ex, fa.ey, pose.fa + lean, null); farFist(); }
+    // 7) near (right, weapon) arm in front of everything
+    const na = IK(nS[0], nS[1], nH[0], nH[1], 18, 18, 1);
+    const glow = anim.state === 'CAST' || (anim.state === 'SWING' && anim.cast) ? (anim.castColor || null) : null;
+    seg(nS[0], nS[1], na.jx, na.jy, 11, sleeveNear, EDGE);
+    if (!dropped) this.drawWeapon(ctx, kind, na.ex, na.ey, pose.na + lean, glow);   // drawn first so the fist closes over the grip
+    seg(na.jx, na.jy, na.ex, na.ey, 10, sleeveNear, EDGE);
+    ctx.fillStyle = skinColor; ctx.strokeStyle = EDGE; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(na.ex, na.ey, 6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
     ctx.restore();
   }
 
@@ -1016,7 +1138,7 @@ class GameEngine {
     let raw = p.str * 1.6 + rand() * 5; if (p.warcry > 0) raw *= 1.4;
     const hit = this.computeHit({ raw, canCrit: true, parryable: true });
     this.later(() => {
-      this.playerAnim.state = 'SWING'; this.playerAnim.weaponRot = -Math.PI / 1.8; this.playerAnim.bodyAngle = 0.2;
+      this.playerAnim.state = 'SWING'; this.playerAnim.timer = 0; this.playerAnim.bodyAngle = 0.2;
       this.applyDamageToEnemy(hit, 'PHYS');
       if (hit.parried) {
         this.enemyAnim.state = 'BLOCK'; this.enemyAnim.xOffset = 25; AudioSys.playBlock(); this.triggerShake(5);
@@ -1038,14 +1160,14 @@ class GameEngine {
     p.mp -= ab.cost; this.updateHUD();
     const e = this.activeEnemy, col = ELEMENTS[ab.element].color;
     if (ab.kind === 'buff') {
-      p.warcry = 3; p.warcryFresh = true; AudioSys.playLevel(); this.spawnSparks(this.playerCoords.x, this.playerCoords.y - 40, '#D4AF37', 26);
+      p.warcry = 3; p.warcryFresh = true; Object.assign(this.playerAnim, { state: 'CAST', timer: 0 }); AudioSys.playLevel(); this.spawnSparks(this.playerCoords.x, this.playerCoords.y - 40, '#D4AF37', 26);
       this.spawnDamageText(this.playerCoords.x - 40, this.playerCoords.y - 120, 'WAR CRY', '#F1C40F', true);
       this.say(this.t('{name} roars a war cry that rattles the {enemy}; {their} blows will land harder.'));
       this.later(() => this.afterPlayerAction(), 600); return;
     }
     if (ab.kind === 'guard') {
       p.guard = 'wall'; const heal = Math.round(p.maxHp * 0.12); p.hp = Math.min(p.maxHp, p.hp + heal);
-      this.playerAnim.state = 'BLOCK'; AudioSys.playBlock();
+      this.playerAnim.state = 'BLOCK'; this.playerAnim.timer = 0; AudioSys.playBlock();
       this.spawnDamageText(this.playerCoords.x, this.playerCoords.y - 120, '+' + heal + ' HP', '#27AE60');
       this.say(this.t('{name} plants {their} shield and catches {their} breath behind it (+{h} health).', { h: heal }));
       this.updateHUD(); this.later(() => this.passTurnToEnemy(), 500); return;
@@ -1053,7 +1175,7 @@ class GameEngine {
     // attack arts
     AudioSys.playSpell(); this.playerAnim.bodyAngle = -0.15;
     if (ab.element === 'PHYS' || p.vocation === 'ROGUE') { this.playerAnim.state = 'LUNGE'; this.playerAnim.timer = 0; }
-    else { this.spawnSparks(this.playerCoords.x + 20, this.playerCoords.y - 60, col); this.spawnBolt(col); }
+    else { Object.assign(this.playerAnim, { state: 'CAST', timer: 0, cast: true, castColor: col }); this.spawnSparks(this.playerCoords.x + 20, this.playerCoords.y - 60, col); this.spawnBolt(col); }
     const hits = [], n = ab.hits || 1;
     for (let i = 0; i < n; i++) {
       let raw = p[ab.scale] * ab.k + (ab.kStr ? p.str * ab.kStr : 0) + ab.flat + rand() * 4;
@@ -1061,7 +1183,7 @@ class GameEngine {
       hits.push(this.computeHit({ element: ab.element, raw, canCrit: !!ab.crit || p.shadowCrit, parryable: false }));
     }
     this.later(() => {
-      this.playerAnim.state = 'SWING'; this.playerAnim.weaponRot = -Math.PI / 1.8;
+      this.playerAnim.state = 'SWING'; this.playerAnim.timer = 0;
       let total = 0; hits.forEach((h, i) => { total += h.dmg; this.applyDamageToEnemy(h, ab.element, i * 26); });
       const mult = hits[0].mult;
       let line = '';
@@ -1093,7 +1215,7 @@ class GameEngine {
 
   executePlayerGuard() {
     if (!this.beginPlayerAction()) return;
-    this.player.guard = 'guard'; this.playerAnim.state = 'BLOCK';
+    this.player.guard = 'guard'; this.playerAnim.state = 'BLOCK'; this.playerAnim.timer = 0;
     this.spawnDamageText(this.playerCoords.x - 40, this.playerCoords.y - 120, 'GUARD', '#D4AF37'); AudioSys.playBlock();
     this.say(this.t('{name} sets {their} feet and raises {their} guard.'));
     this.updateHUD(); this.later(() => this.passTurnToEnemy(), 400);
@@ -1149,7 +1271,7 @@ class GameEngine {
         dmg = Math.max(1, Math.round(dmg * g));
         p.hp = Math.max(0, p.hp - dmg);
         if (g < 1) {
-          this.playerAnim.state = 'BLOCK'; this.playerAnim.xOffset = -20; AudioSys.playBlock(); this.triggerShake(6);
+          this.playerAnim.state = 'BLOCK'; this.playerAnim.timer = 1; this.playerAnim.xOffset = -20; AudioSys.playBlock(); this.triggerShake(6);
           this.spawnDamageText(this.playerCoords.x - 40, this.playerCoords.y - 130, 'BLOCKED', '#74B9FF', true); this.spawnDamageText(this.playerCoords.x, this.playerCoords.y - 90, dmg, '#BDC3C7');
           this.spawnBlockSparks(this.playerCoords.x + 25, this.playerCoords.y - 40);
           this.say(verb + this.t('; {name} takes it on {their} guard. Only {d} gets through.', { d: dmg }));
@@ -1174,7 +1296,7 @@ class GameEngine {
         p.feathers--; p.hp = Math.round(p.maxHp * 0.3);
         this.spawnSparks(this.playerCoords.x, this.playerCoords.y - 40, '#F39C12', 40);
         this.say(this.t("{name} falls, and the Phoenix Feather bursts into flame. {name} rises again!"));
-      } else return this.later(() => this.executePlayerDefeat(), 600);
+      } else { Object.assign(this.playerAnim, { state: 'DEFEAT', timer: 0, xOffset: -30 }); this.say(this.t('{name} staggers back and falls.')); return this.later(() => this.executePlayerDefeat(), 1100); }
     }
     if (p.warcryFresh) p.warcryFresh = false; else if (p.warcry > 0) p.warcry--;
     p.mp = Math.min(p.maxMp, p.mp + this.cls.mpRegen);
@@ -1449,6 +1571,7 @@ class GameEngine {
     const pa = this.playerAnim, ea = this.enemyAnim;
     if (pa.state === 'LUNGE') { pa.timer += dt; const k = Math.min(1, pa.timer / 0.28); pa.xOffset = k * this.lunge; pa.weaponRot = -k * 1.2; pa.bodyAngle = k * 0.18; }
     else if (pa.state === 'RECOIL') { pa.timer += dt; pa.xOffset = Math.sin(pa.timer * 20) * 8 - 40; pa.bodyAngle = -0.3; }
+    else if (pa.state === 'SWING' || pa.state === 'CAST' || pa.state === 'BLOCK' || pa.state === 'DEFEAT') pa.timer += dt;
     if (ea.state === 'LUNGE') { ea.timer += dt; const k = Math.min(1, ea.timer / 0.26); ea.xOffset = -k * this.lunge * 0.92; ea.weaponRot = k * 0.9; ea.bodyAngle = -k * 0.2; }
     else if (ea.state === 'RECOIL') { ea.timer += dt; ea.xOffset = Math.sin(ea.timer * 20) * 8 + 40; ea.bodyAngle = 0.35; }
     else if (ea.state === 'DEFEAT') { ea.timer += dt; ea.rot = Math.min(Math.PI / 2, ea.timer / 0.5 * Math.PI / 2); ea.alpha = Math.max(0, 1 - ea.timer / 0.6); }
