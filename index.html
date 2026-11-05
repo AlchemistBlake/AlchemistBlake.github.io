@@ -36,7 +36,7 @@
       <p class="lede">I design AI operating systems, metacognitive multi-agent architectures and deterministic simulation engines, from kernel-level invariants and formal contracts up to Android and web applications. I'm self-taught and work hands-on with LLM tooling (Gemini, Google AI Studio, Opal) to research, specify and build.</p>
       <p class="signature"><span>Signature architecture</span>A neuro-symbolic system with decoupled neural-inference and symbolic-reasoning pipelines over a hypergraph knowledge representation <em>(Neuro-symbolic Separated Dual-Pipeline Hypergraph Topology)</em>.</p>
       <ul class="stats" aria-label="At a glance">
-        <li><b>20<small class="stat-of"> / 500+</small></b><span>projects shown, of 500+ built</span></li>
+        <li><b>21<small class="stat-of"> / 500+</small></b><span>projects shown, of 500+ built</span></li>
         <li><b>14</b><span>engineering disciplines</span></li>
         <li><b>Go · Py · Kt</b><span>languages in code</span></li>
         <li><b>2026</b><span>active build year</span></li>
@@ -159,6 +159,20 @@
     <details class="deep"><summary>Technical deep dive</summary><div class="deep-body"><p>A complete turn-based fantasy RPG in one HTML file: clickable Haven town, six regions, seven classes with alignment variants, guilds, friend-code arena PvP, browser autosave and portable save codes. Procedural canvas art and synthesized audio; PeerJS loads only when the Arena opens.</p><ul class="bullets"><li>Seven vocations: Warrior, Mage, Rogue plus unlockable Magi, Berserker, Beast Tamer and Bard. Eighteen alignments flavor titles (Fire Magi, Demonic Berserker) and advanced-class combat. Ten ranks per class with a Rank 5 special and a Rank 10 ultimate.</li><li>Six expedition regions with 40+ monsters, weighted loot tables, rare berserk encounters (×2 EXP and drops, quest chance), and a multi-phase final boss.</li><li>Progression systems: talent trees, gear rarities upgraded at the Forge, eighteen element guilds with reputation roles and gated shops, Arena-Shards and random-element Arena Chests.</li><li>Social Arena hub with Top 25 / Top 5 boards (local and duel-network merge on friend-code connect) and request/accept WebRTC duels over PeerJS signalling.</li><li>Clickable Haven town map (forge, vault, guild hall, arena, class tutor, NPCs), schema-migrating localStorage autosave (v1→v3) and AETH1 export/import codes.</li><li>Elemental combat cycle Fire → Ice → Air → Darkness with live HUD multipliers; Bard note mini-game; Beast Tamer pet evolution at levels 25 / 50 / 75.</li><li>Playwright end-to-end suite (498 checks) across desktop and phone viewports: full campaigns, save migrations, arena loopback duels, zero console errors on offline paths.</li></ul></div></details>
     <div class="foot"><div class="srcs"></div><div class="links"><a class="btn btn--play" href="play/aethelgard/" aria-label="Play Aethelgard: Chronicles of Lore, a turn-based RPG that runs in your browser"><span aria-hidden="true">▶</span> Play Aethelgard</a></div></div>
   </div>
+</article><article class="card" id="super-crab" style="--h:18">
+  <div class="thumb" aria-hidden="true"><span class="glyph">🦀</span><span class="grid"></span></div>
+  <div class="body">
+    <div class="meta"><span class="kicker">Browser action · single-file game</span><span class="dates">Nov 2026</span></div>
+    <h4>Super Crab: Campaign</h4>
+    <span class="status status--code">Implemented code</span>
+    <p class="tldr"><strong>A twin-stick action campaign in one HTML file: five locations, bosses with real phase mechanics, town upgrades, cosmetics, local and invite co-op, and SC2 save codes.</strong></p>
+    <dl class="pa"><div><dt>Problem</dt><dd>A portfolio action demo should feel tight on desktop and phone, with real boss mechanics — not a stub that only looks finished.</dd></div><div><dt>Approach</dt><dd>One canvas file with data-driven stages and bosses, Web Audio SFX, localStorage plus portable SC2 codes, and Playwright coverage of campaign, shop, saves and local co-op.</dd></div></dl>
+    <h5 class="built-h">What I built</h5>
+    <ul class="bullets"><li>5 locations × 3 stages + 5 bosses with phase mechanics</li><li>Skill loadouts, Shell Point shop and cosmetic unlocks</li><li>Local 2P and invite WebRTC co-op; SC2 save codes</li><li>Touch controls and control legend; 48 Playwright checks</li></ul>
+    <div class="stack"><span>Stack</span><ul><li>JavaScript</li><li>HTML5 Canvas 2D</li><li>Web Audio API</li><li>WebRTC</li><li>BroadcastChannel</li><li>CSS</li><li>Game feel &amp; combat design</li><li>Touch controls</li><li>Playwright (Python)</li></ul></div>
+    <details class="deep"><summary>Technical deep dive</summary><div class="deep-body"><p>A twin-stick action campaign in one HTML file: five beach-to-neon locations, stage waves, five bosses with real phase mechanics, town upgrades, cosmetics, skill loadouts, local 2P and invite co-op, plus SC2 save codes. Procedural canvas art and synthesized audio; STUN only when online co-op starts.</p><ul class="bullets"><li>Five locations with three stages each and a named boss (Kraken King, Coral Hydra, Ghost Captain, Magma Titan, Storm Gull MK-II), including hydra head regen, spectral barriers and timed hack windows.</li><li>Six skills with three equipped slots, Shell Point shop, and cosmetic unlocks (colors, patterns, claws, eyes, accessories).</li><li>Local two-player co-op and invite-link WebRTC co-op (BroadcastChannel + STUN); host-authoritative combat.</li><li>localStorage autosave with SC2 export/import codes; mute, pause, touch sticks and an on-screen control legend.</li><li>Playwright end-to-end suite (48 checks): campaign boot, bosses, skills, shop, save round-trip, local coop, mobile portrait.</li></ul></div></details>
+    <div class="foot"><div class="srcs"></div><div class="links"><a class="btn btn--play" href="play/super-crab/" aria-label="Play Super Crab: Campaign, a twin-stick action game that runs in your browser"><span aria-hidden="true">▶</span> Play Super Crab</a></div></div>
+  </div>
 </article><article class="card" id="sim-substrate" style="--h:130">
   <div class="thumb" aria-hidden="true"><span class="glyph">∿</span><span class="grid"></span></div>
   <div class="body">
@@ -173,7 +187,7 @@
     <details class="deep"><summary>Technical deep dive</summary><div class="deep-body"><p>A research architecture for physically grounded simulation, in which LLM-driven world building is constrained by thermodynamic, geospatial, biomechanical and physics rules, with full provenance tracking of state.</p><ul class="bullets"><li>Designed a one-way ingestion pipeline (data-diode pattern) that routes all inputs through a truth-state validation engine before they reach the 4-tier execution hierarchy.</li><li>Specified cryptographic provenance tracking (Proof of Cognitive Work) so all input data is verifiably human-origin, plus provenance-backed state tracking to prevent model collapse caused by training on synthetic data.</li><li>Integrated the engine, planner and storyteller frameworks into one system-of-systems.</li></ul></div></details>
     <div class="foot"><div class="srcs"><span class="src src--drive">Drive</span></div><div class="links"><span class="on-request">Files available on request</span></div></div>
   </div>
-</article><article class="card card--wide" id="singularity-ar" style="--h:180">
+</article><article class="card" id="singularity-ar" style="--h:180">
   <div class="thumb" aria-hidden="true"><span class="glyph">▦</span><span class="grid"></span></div>
   <div class="body">
     <div class="meta"><span class="kicker">Modular game platform</span><span class="dates">May – Jul 2026</span></div>
