@@ -232,3 +232,12 @@ main:focus{outline:none}
 .contact__rates a{color:var(--gold)}
 @media (prefers-reduced-motion:reduce){.svc,.svc:hover{transition:none;transform:none}}
 @media (max-width:480px){.nav nav{display:flex;flex-wrap:wrap;justify-content:flex-end;row-gap:4px}.nav nav a{white-space:nowrap}.nav nav a[href="#about"]{display:none}}
+
+/* social profiles */
+.social{margin-top:28px}
+.social__label{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;opacity:.7;margin:0 0 10px}
+.social__list{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.social__btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.04);color:inherit;text-decoration:none;font-size:.9rem;transition:border-color .2s,background .2s}
+.social__btn:hover,.social__btn:focus-visible{border-color:rgba(180,140,255,.7);background:rgba(140,90,255,.12)}
+.social__btn:focus-visible{outline:2px solid #b48cff;outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.social__btn{transition:none}}
