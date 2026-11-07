@@ -209,3 +209,6 @@ main:focus{outline:none}
 .btn--play::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,#ffffff30 50%,transparent 70%);transform:translateX(-120%);animation:btnSheen 4.5s ease-in-out infinite}
 @keyframes btnSheen{60%,100%{transform:translateX(120%)}}
 @media (prefers-reduced-motion:reduce){.ambient i,.aura,.nav::after,.btn--glow,.btn--play::after,.card:hover::before,.card:focus-within::before{animation:none!important}}
+/* hero quick-play row (games) */
+.cta--play{margin-top:14px;align-items:center}
+.cta__label{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted,#9a93b0);margin-right:4px}
