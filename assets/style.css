@@ -212,3 +212,23 @@ main:focus{outline:none}
 /* hero quick-play row (games) */
 .cta--play{margin-top:14px;align-items:center}
 .cta__label{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted,#9a93b0);margin-right:4px}
+/* Services + availability (review 2026-11-07) */
+.avail{display:inline-flex;align-items:center;gap:10px;margin:14px 0 0;padding:6px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(23,20,39,.7);color:var(--text);font-size:.95rem}
+.avail__dot{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 3px rgba(74,222,128,.18);flex:none}
+.play-notes{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:4px;max-width:760px;color:var(--muted);font-size:.88rem;line-height:1.45}
+.play-notes strong{color:var(--text);font-weight:600}
+.services__lead{color:var(--muted);max-width:720px;margin:8px 0 28px}
+.svc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.svc{display:flex;flex-direction:column;gap:14px;padding:24px;background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--r);transition:transform .25s,border-color .25s}
+.svc:hover{transform:translateY(-3px);border-color:var(--violet)}
+.svc--feature{border-color:rgba(231,194,125,.55)}
+.svc h3{margin:0;font-size:1.15rem}
+.svc__price{margin:0;color:var(--muted)}
+.svc__price span:not(.svc__from){font-size:2rem;font-weight:700;color:var(--gold)}
+.svc__from{font-size:.8rem;text-transform:uppercase;letter-spacing:.12em}
+.svc ul{margin:0;padding-left:18px;color:var(--text);line-height:1.5;flex:1}
+.svc .btn{align-self:flex-start}
+.contact__rates{color:var(--muted);font-size:.95rem}
+.contact__rates a{color:var(--gold)}
+@media (prefers-reduced-motion:reduce){.svc,.svc:hover{transition:none;transform:none}}
+@media (max-width:480px){.nav nav{display:flex;flex-wrap:wrap;justify-content:flex-end;row-gap:4px}.nav nav a{white-space:nowrap}.nav nav a[href="#about"]{display:none}}
