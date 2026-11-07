@@ -1,0 +1,460 @@
+{
+  "schema_version": 1,
+  "source": {
+    "filename": "fixture.wav",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "duration_ms": 30000,
+    "sample_rate": 44100
+  },
+  "analysis": {
+    "bpm_x100": 12000,
+    "time_signature": "4/4",
+    "key": "Amin",
+    "analyzer_version": "fixture"
+  },
+  "aspect": "16:9",
+  "beats": [
+    {
+      "t_ms": 0,
+      "bar": 1,
+      "beat": 1,
+      "downbeat": true
+    },
+    {
+      "t_ms": 500,
+      "bar": 1,
+      "beat": 2,
+      "downbeat": false
+    },
+    {
+      "t_ms": 1000,
+      "bar": 1,
+      "beat": 3,
+      "downbeat": false
+    },
+    {
+      "t_ms": 1500,
+      "bar": 1,
+      "beat": 4,
+      "downbeat": false
+    },
+    {
+      "t_ms": 2000,
+      "bar": 2,
+      "beat": 1,
+      "downbeat": true
+    },
+    {
+      "t_ms": 2500,
+      "bar": 2,
+      "beat": 2,
+      "downbeat": false
+    },
+    {
+      "t_ms": 3000,
+      "bar": 2,
+      "beat": 3,
+      "downbeat": false
+    },
+    {
+      "t_ms": 3500,
+      "bar": 2,
+      "beat": 4,
+      "downbeat": false
+    },
+    {
+      "t_ms": 4000,
+      "bar": 3,
+      "beat": 1,
+      "downbeat": true
+    },
+    {
+      "t_ms": 4500,
+      "bar": 3,
+      "beat": 2,
+      "downbeat": false
+    },
+    {
+      "t_ms": 5000,
+      "bar": 3,
+      "beat": 3,
+      "downbeat": false
+    },
+    {
+      "t_ms": 5500,
+      "bar": 3,
+      "beat": 4,
+      "downbeat": false
+    },
+    {
+      "t_ms": 6000,
+      "bar": 4,
+      "beat": 1,
+      "downbeat": true
+    },
+    {
+      "t_ms": 6500,
+      "bar": 4,
+      "beat": 2,
+      "downbeat": false
+    },
+    {
+      "t_ms": 7000,
+      "bar": 4,
+      "beat": 3,
+      "downbeat": false
+    },
+    {
+      "t_ms": 7500,
+      "bar": 4,
+      "beat": 4,
+      "downbeat": false
+    },
+    {
+      "t_ms": 8000,
+      "bar": 5,
+      "beat": 1,
+      "downbeat": true
+    },
+    {
+      "t_ms": 8500,
+      "bar": 5,
+      "beat": 2,
+      "downbeat": false
+    },
+    {
+      "t_ms": 9000,
+      "bar": 5,
+      "beat": 3,
+      "downbeat": false
+    },
+    {
+      "t_ms": 9500,
+      "bar": 5,
+      "beat": 4,
+      "downbeat": false
+    },
+    {
+      "t_ms": 10000,
+      "bar": 6,
+      "beat": 1,
+      "downbeat": true
+    },
+    {
+      "t_ms": 10500,
+      "bar": 6,
+      "beat": 2,
+      "downbeat": false
+    },
+    {
+      "t_ms": 11000,
+      "bar": 6,
+      "beat": 3,
+      "downbeat": false
+    },
+    {
+      "t_ms": 11500,
+      "bar": 6,
+      "beat": 4,
+      "downbeat": false
+    },
+    {
+      "t_ms": 12000,
+      "bar": 7,
+      "beat": 1,
+      "downbeat": true
+    },
+    {
+      "t_ms": 12500,
+      "bar": 7,
+      "beat": 2,
+      "downbeat": false
+    },
+    {
+      "t_ms": 13000,
+      "bar": 7,
+      "beat": 3,
+      "downbeat": false
+    },
+    {
+      "t_ms": 13500,
+      "bar": 7,
+      "beat": 4,
+      "downbeat": false
+    },
+    {
+      "t_ms": 14000,
+      "bar": 8,
+      "beat": 1,
+      "downbeat": true
+    },
+    {
+      "t_ms": 14500,
+      "bar": 8,
+      "beat": 2,
+      "downbeat": false
+    },
+    {
+      "t_ms": 15000,
+      "bar": 8,
+      "beat": 3,
+      "downbeat": false
+    },
+    {
+      "t_ms": 15500,
+      "bar": 8,
+      "beat": 4,
+      "downbeat": false
+    },
+    {
+      "t_ms": 16000,
+      "bar": 9,
+      "beat": 1,
+      "downbeat": true
+    },
+    {
+      "t_ms": 16500,
+      "bar": 9,
+      "beat": 2,
+      "downbeat": false
+    },
+    {
+      "t_ms": 17000,
+      "bar": 9,
+      "beat": 3,
+      "downbeat": false
+    },
+    {
+      "t_ms": 17500,
+      "bar": 9,
+      "beat": 4,
+      "downbeat": false
+    },
+    {
+      "t_ms": 18000,
+      "bar": 10,
+      "beat": 1,
+      "downbeat": true
+    },
+    {
+      "t_ms": 18500,
+      "bar": 10,
+      "beat": 2,
+      "downbeat": false
+    },
+    {
+      "t_ms": 19000,
+      "bar": 10,
+      "beat": 3,
+      "downbeat": false
+    },
+    {
+      "t_ms": 19500,
+      "bar": 10,
+      "beat": 4,
+      "downbeat": false
+    },
+    {
+      "t_ms": 20000,
+      "bar": 11,
+      "beat": 1,
+      "downbeat": true
+    },
+    {
+      "t_ms": 20500,
+      "bar": 11,
+      "beat": 2,
+      "downbeat": false
+    },
+    {
+      "t_ms": 21000,
+      "bar": 11,
+      "beat": 3,
+      "downbeat": false
+    },
+    {
+      "t_ms": 21500,
+      "bar": 11,
+      "beat": 4,
+      "downbeat": false
+    },
+    {
+      "t_ms": 22000,
+      "bar": 12,
+      "beat": 1,
+      "downbeat": true
+    },
+    {
+      "t_ms": 22500,
+      "bar": 12,
+      "beat": 2,
+      "downbeat": false
+    },
+    {
+      "t_ms": 23000,
+      "bar": 12,
+      "beat": 3,
+      "downbeat": false
+    },
+    {
+      "t_ms": 23500,
+      "bar": 12,
+      "beat": 4,
+      "downbeat": false
+    },
+    {
+      "t_ms": 24000,
+      "bar": 13,
+      "beat": 1,
+      "downbeat": true
+    },
+    {
+      "t_ms": 24500,
+      "bar": 13,
+      "beat": 2,
+      "downbeat": false
+    },
+    {
+      "t_ms": 25000,
+      "bar": 13,
+      "beat": 3,
+      "downbeat": false
+    },
+    {
+      "t_ms": 25500,
+      "bar": 13,
+      "beat": 4,
+      "downbeat": false
+    },
+    {
+      "t_ms": 26000,
+      "bar": 14,
+      "beat": 1,
+      "downbeat": true
+    },
+    {
+      "t_ms": 26500,
+      "bar": 14,
+      "beat": 2,
+      "downbeat": false
+    },
+    {
+      "t_ms": 27000,
+      "bar": 14,
+      "beat": 3,
+      "downbeat": false
+    },
+    {
+      "t_ms": 27500,
+      "bar": 14,
+      "beat": 4,
+      "downbeat": false
+    },
+    {
+      "t_ms": 28000,
+      "bar": 15,
+      "beat": 1,
+      "downbeat": true
+    },
+    {
+      "t_ms": 28500,
+      "bar": 15,
+      "beat": 2,
+      "downbeat": false
+    },
+    {
+      "t_ms": 29000,
+      "bar": 15,
+      "beat": 3,
+      "downbeat": false
+    },
+    {
+      "t_ms": 29500,
+      "bar": 15,
+      "beat": 4,
+      "downbeat": false
+    }
+  ],
+  "sections": [
+    {
+      "id": "s0",
+      "label": "intro",
+      "start_ms": 0,
+      "end_ms": 8000,
+      "energy_q8": 80
+    },
+    {
+      "id": "s1",
+      "label": "verse",
+      "start_ms": 8000,
+      "end_ms": 30000,
+      "energy_q8": 160
+    }
+  ],
+  "lyrics": [
+    {
+      "start_ms": 8200,
+      "end_ms": 11000,
+      "text": "first line"
+    }
+  ],
+  "shots": [
+    {
+      "index": 0,
+      "start_ms": 0,
+      "end_ms": 8000,
+      "section_id": "s0",
+      "subject": "a lighthouse",
+      "action": "beam sweeps",
+      "camera": "slow dolly in",
+      "lighting": "blue hour",
+      "lyric_refs": []
+    },
+    {
+      "index": 1,
+      "start_ms": 8000,
+      "end_ms": 20000,
+      "section_id": "s1",
+      "subject": "a diver",
+      "action": "descends",
+      "camera": "tracking",
+      "lighting": "caustics",
+      "lyric_refs": [
+        0
+      ]
+    },
+    {
+      "index": 2,
+      "start_ms": 20000,
+      "end_ms": 30000,
+      "section_id": "s1",
+      "subject": "a reef",
+      "action": "pulses",
+      "camera": "orbit",
+      "lighting": "bioluminescent",
+      "lyric_refs": []
+    }
+  ],
+  "provenance": {
+    "audio_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "stages": [
+      {
+        "stage": "lyrics",
+        "model_id": "gemini-3.5-transcribe",
+        "prompt_version": "1.0.0",
+        "temperature": 0,
+        "response_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "created_at": "2026-11-06T22:00:00Z"
+      },
+      {
+        "stage": "storyboard",
+        "model_id": "gemini-4-argon",
+        "prompt_version": "1.0.0",
+        "temperature": 0,
+        "response_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "created_at": "2026-11-06T22:01:00Z"
+      }
+    ]
+  },
+  "determinism_hash": "196bd92daf28541032bc0d3b4a9197d41a4bcb05969bdf9d25471620a9817bdf"
+}
