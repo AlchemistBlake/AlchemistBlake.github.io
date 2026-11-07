@@ -1,0 +1,324 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "music-omni/timeline/v1",
+  "title": "Music-to-Omni timeline contract v1",
+  "description": "Stage 1 (DSP sound map) output, consumed by stage 3 (storyboard) and stage 4 (prompt assembly). sig: BWA_15.2003075_SOV_96.7Hz_SHA-BEWA_69912070 Rounding rule (M-037): every *_ms and bpm_x100 value is round-half-up computed from a decimal string or fixed-point integer, never float multiplication. Invariants beyond JSON Schema are enforced by validator/validate.js and validator/validate.py.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source",
+    "analysis",
+    "beats",
+    "sections",
+    "lyrics",
+    "shots",
+    "provenance",
+    "aspect",
+    "determinism_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "filename",
+        "sha256",
+        "duration_ms",
+        "sample_rate"
+      ],
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sample_rate": {
+          "type": "integer",
+          "minimum": 8000,
+          "description": "Decoded PCM sample rate (M-038)."
+        }
+      }
+    },
+    "analysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bpm_x100",
+        "time_signature",
+        "key",
+        "analyzer_version"
+      ],
+      "properties": {
+        "bpm_x100": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 2000,
+          "maximum": 40000,
+          "description": "null exactly when beats is empty."
+        },
+        "time_signature": {
+          "type": "string",
+          "enum": [
+            "3/4",
+            "4/4",
+            "5/4",
+            "6/8",
+            "7/8",
+            "12/8"
+          ]
+        },
+        "key": {
+          "type": "string",
+          "pattern": "^([A-G](#|b)?(maj|min)|unknown)$"
+        },
+        "analyzer_version": {
+          "type": "string"
+        }
+      }
+    },
+    "beats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "t_ms",
+          "bar",
+          "beat",
+          "downbeat"
+        ],
+        "properties": {
+          "t_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "bar": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "beat": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "downbeat": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "start_ms",
+          "end_ms",
+          "energy_q8"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "enum": [
+              "intro",
+              "verse",
+              "pre_chorus",
+              "chorus",
+              "bridge",
+              "breakdown",
+              "drop",
+              "outro",
+              "instrumental"
+            ],
+            "description": "Stage 1 assigns from a documented heuristic; stage 3 may relabel."
+          },
+          "start_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_ms": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "energy_q8": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          }
+        }
+      }
+    },
+    "lyrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "start_ms",
+          "end_ms",
+          "text"
+        ],
+        "properties": {
+          "start_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_ms": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "shots": {
+      "description": "Filled by stage 3. Invariants checked in code: shots are contiguous, start/end land on a bar downbeat (except song start/end), 3000 <= end_ms - start_ms <= 15000, aspect is the job-wide value.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "index",
+          "start_ms",
+          "end_ms",
+          "section_id",
+          "subject",
+          "action",
+          "camera",
+          "lighting",
+          "lyric_refs"
+        ],
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "start_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_ms": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Duration end_ms - start_ms must be 3000..15000 (checked by the shared validator)."
+          },
+          "section_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "subject": {
+            "type": "string",
+            "minLength": 1
+          },
+          "action": {
+            "type": "string",
+            "minLength": 1
+          },
+          "camera": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lighting": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lyric_refs": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "provenance": {
+      "description": "M-030: only analysis and assembly are deterministic. Model stages are reproduced by replaying this saved record, never by a second live call.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "audio_sha256",
+        "stages"
+      ],
+      "properties": {
+        "audio_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "stages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "stage",
+              "model_id",
+              "prompt_version",
+              "temperature",
+              "response_sha256",
+              "created_at"
+            ],
+            "properties": {
+              "stage": {
+                "enum": [
+                  "lyrics",
+                  "storyboard"
+                ]
+              },
+              "model_id": {
+                "type": "string"
+              },
+              "prompt_version": {
+                "type": "string",
+                "pattern": "^\\d+\\.\\d+\\.\\d+$"
+              },
+              "temperature": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 2
+              },
+              "response_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      }
+    },
+    "aspect": {
+      "enum": [
+        "16:9",
+        "9:16"
+      ],
+      "description": "Job-wide Omni aspect ratio (M-039)."
+    },
+    "determinism_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "M-036: sha256 of canonical({analysis, beats, sections, source minus filename}) (M-043); canonical = recursively sorted keys, no whitespace, JSON string escaping, integers only. Reference: stage1/detmath.js determinismHash, mirrored in validator/validate.py."
+    }
+  }
+}
