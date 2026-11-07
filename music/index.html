@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' https://generativelanguage.googleapis.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="author" content="Blake Wayne Allcorn">
+<meta name="sig" content="BWA_15.2003075_SOV_96.7Hz_SHA-BEWA_69912070">
+<title>96.7 Alchemist · Music → Omni Storyboard</title>
+<link rel="stylesheet" href="app/app.css">
+</head>
+<body>
+<header>
+  <h1>Music → Omni Storyboard</h1>
+  <p class="sub">Upload a song. Get a beat-locked storyboard and one copy-paste prompt per shot for Gemini Omni Flash (3–15 s clips).</p>
+</header>
+<main>
+  <section class="card" id="step1">
+    <h2>1 · Song</h2>
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept=".mp3,.m4a,.wav,audio/mpeg,audio/mp4,audio/wav,audio/x-wav">
+      <span id="dropText">Choose an mp3, m4a or wav</span>
+    </label>
+    <div class="row">
+      <label>Aspect
+        <select id="aspect"><option value="16:9">16:9 widescreen</option><option value="9:16">9:16 vertical</option></select>
+      </label>
+      <label class="grow">Or load a saved project <input type="file" id="loadJson" accept=".json,application/json"></label>
+    </div>
+    <div id="analysis" class="muted">No song loaded.</div>
+    <canvas id="wave" height="140" hidden></canvas>
+    <div id="legend" class="legend" hidden></div>
+  </section>
+
+  <section class="card" id="step2">
+    <h2>2 · Storyboard</h2>
+    <div class="row">
+      <label class="grow">Gemini API key
+        <input type="password" id="key" autocomplete="off" spellcheck="false" placeholder="Pasted for this tab only; never saved">
+      </label>
+      <label>Model <select id="model" disabled><option>Enter key first</option></select></label>
+    </div>
+    <p class="muted small">The key lives only in this tab's memory and goes only to Google's API. Nothing is stored, logged, or put in the URL. Reloading the page forgets it.</p>
+    <label>Creative brief <textarea id="brief" rows="2" placeholder="Characters, setting, mood, story arc"></textarea></label>
+    <div class="row">
+      <label class="grow">Style <input id="style" placeholder="e.g. anamorphic film look, shallow depth of field"></label>
+      <label class="grow">Palette <input id="palette" placeholder="e.g. teal and amber"></label>
+    </div>
+    <div class="row">
+      <label class="grow">Characters (one per line) <textarea id="chars" rows="2"></textarea></label>
+      <label class="grow">Continuity notes <textarea id="cont" rows="2"></textarea></label>
+    </div>
+    <div id="estimate" class="estimate" hidden></div>
+    <button id="run" disabled>Generate storyboard</button>
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+  </section>
+
+  <section class="card" id="step3" hidden>
+    <h2>3 · Shots</h2>
+    <div class="row">
+      <button id="copyAll" class="ghost">Copy all prompts</button>
+      <button id="dlTxt" class="ghost">Download prompts .txt</button>
+      <button id="dlJson" class="ghost">Save project .json</button>
+    </div>
+    <div id="warnings" class="warn" hidden></div>
+    <ol id="shots" class="shots"></ol>
+  </section>
+</main>
+<footer>
+  <span>© Blake Wayne Allcorn · 96.7 Alchemist · All rights reserved</span>
+  <span class="sig">BWA_15.2003075_SOV_96.7Hz_SHA-BEWA_69912070</span>
+</footer>
+<script src="src/wav.js"></script>
+<script src="src/lyrics_snap.js"></script>
+<script src="src/gemini.js"></script>
+<script type="module" src="app/app.js"></script>
+</body>
+</html>
