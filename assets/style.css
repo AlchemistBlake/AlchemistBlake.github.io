@@ -175,3 +175,37 @@ main:focus{outline:none}
 .btn--play{background:linear-gradient(90deg,#7c3aed,#8a5a1f);border:0;color:#fff;font-weight:600}
 .btn--play:hover{filter:brightness(1.12);background:linear-gradient(90deg,#7c3aed,#8a5a1f)}
 .links .btn--play{font-size:.85rem;padding:7px 14px}
+/* ---- Lighting layer (ambient drift, edge lighting, pointer spotlight). sig: BWA_15.2003075_SOV_96.7Hz_SHA-BEWA_69912070 ---- */
+@property --edge{syntax:"<angle>";inherits:false;initial-value:0deg}
+.ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.ambient i{position:absolute;width:60vmax;height:60vmax;border-radius:50%;opacity:.5;will-change:transform}
+.ambient i:nth-child(1){background:radial-gradient(closest-side,#7c3aed55,#7c3aed1a 55%,transparent);left:-12vmax;top:-10vmax;animation:drift1 38s ease-in-out infinite alternate}
+.ambient i:nth-child(2){background:radial-gradient(closest-side,#c08a3e40,#c08a3e12 55%,transparent);right:-18vmax;top:30vh;animation:drift2 46s ease-in-out infinite alternate}
+.ambient i:nth-child(3){background:radial-gradient(closest-side,#0ea5a433,#0ea5a40f 55%,transparent);left:30vw;bottom:-30vmax;animation:drift3 54s ease-in-out infinite alternate}
+@keyframes drift1{to{transform:translate3d(18vw,22vh,0) scale(1.15)}}
+@keyframes drift2{to{transform:translate3d(-22vw,-18vh,0) scale(.9)}}
+@keyframes drift3{to{transform:translate3d(-16vw,-26vh,0) scale(1.2)}}
+.aura{animation:auraSpin 28s linear infinite;will-change:transform}
+@keyframes auraSpin{to{transform:rotate(1turn)}}
+.nav{overflow:hidden}
+.nav::after{content:"";position:absolute;left:0;bottom:0;width:40%;height:1px;background:linear-gradient(90deg,transparent,var(--violet),var(--gold),transparent);animation:navSweep 7s linear infinite;opacity:.8;pointer-events:none;will-change:transform}
+@keyframes navSweep{from{transform:translateX(-100%)}to{transform:translateX(250%)}}
+.nav-app{color:var(--gold)!important}
+/* card edge lighting: a static top-edge highlight always; a rotating light traces the border on hover/focus */
+.card{position:relative;isolation:isolate}
+.card::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;z-index:2;
+  background:conic-gradient(from var(--edge),transparent 0 62%,hsl(var(--h) 90% 70% / .95) 75%,#fff8 80%,hsl(calc(var(--h) + 40) 90% 65% / .9) 85%,transparent 95%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);
+  opacity:0;transition:opacity .35s}
+.card:hover::before,.card:focus-within::before{opacity:1;animation:edgeSpin 3.2s linear infinite}
+@keyframes edgeSpin{to{--edge:360deg}}
+.card .thumb::after{content:"";position:absolute;left:8%;right:8%;top:0;height:1px;background:linear-gradient(90deg,transparent,hsl(var(--h) 90% 78% / .8),transparent)}
+.card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:1;opacity:0;transition:opacity .3s;
+  background:radial-gradient(420px circle at var(--mx,50%) var(--my,0%),hsl(var(--h) 90% 70% / .10),transparent 60%)}
+.card:hover::after{opacity:1}
+.btn--glow{border-color:hsl(175 70% 50% / .6);box-shadow:0 0 0 0 hsl(175 80% 55% / .5);animation:glowPulse 3.4s ease-in-out infinite}
+@keyframes glowPulse{50%{box-shadow:0 0 22px 2px hsl(175 80% 55% / .35)}}
+.btn--play{position:relative;overflow:hidden}
+.btn--play::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,#ffffff30 50%,transparent 70%);transform:translateX(-120%);animation:btnSheen 4.5s ease-in-out infinite}
+@keyframes btnSheen{60%,100%{transform:translateX(120%)}}
+@media (prefers-reduced-motion:reduce){.ambient i,.aura,.nav::after,.btn--glow,.btn--play::after,.card:hover::before,.card:focus-within::before{animation:none!important}}

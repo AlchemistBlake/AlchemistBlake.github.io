@@ -6,14 +6,15 @@
 <title>Blake Allcorn | AI Systems Architect: Neuro-symbolic &amp; Multi-Agent Systems, Simulation Engines</title>
 <meta name="description" content="Blake Allcorn: AI systems architect specializing in neuro-symbolic and multi-agent LLM architectures, deterministic simulation and game engines, design-by-contract, zero-trust architecture, Go, Python, Kotlin and Android.">
 <meta name="keywords" content="AI Systems Architect, neuro-symbolic AI, multi-agent systems, LLM orchestration, multi-agent orchestration, agentic workflows, self-healing pipelines, human-in-the-loop, HITL, red-teaming, Top-K pruning, state machines, dependency graphs, prompt engineering, knowledge graph, hypergraph, ontology engineering, simulation engine, game engine, ECS, deterministic replay, event-driven architecture, design by contract, zero-trust, eBPF, Merkle tree, hash chaining, tamper-evident audit logs, append-only ledger, cryptographic provenance, SHA-256, integrity verification, Temporal, Go, Python, Kotlin, Android, FlatBuffers">
-<link rel="stylesheet" href="assets/style.css?v=0cadc00d">
+<link rel="stylesheet" href="assets/style.css?v=21dd1cbb">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚗</text></svg>">
 </head>
 <body id="top">
+<div class="ambient" aria-hidden="true"><i></i><i></i><i></i></div>
 <a class="skip" href="#main">Skip to content</a>
 <header class="nav">
   <a class="brand" href="#top"><span class="brand-mark">⚗</span> Blake Allcorn</a>
-  <nav><a href="#about">About</a><a href="#capabilities">Capabilities</a><a href="#work">Work</a><a href="#skills">Skills</a><a href="#contact">Contact</a></nav>
+  <nav><a href="#about">About</a><a href="#capabilities">Capabilities</a><a href="#work">Work</a><a href="music/" class="nav-app">Music App</a><a href="#skills">Skills</a><a href="#contact">Contact</a></nav>
 </header>
 
 <main id="main" tabindex="-1">
@@ -26,6 +27,7 @@
   <div class="cta">
     <a class="btn btn--primary btn--lg" href="#contact">Let&rsquo;s Talk</a>
     <a class="btn btn--lg" href="#work">View projects</a>
+    <a class="btn btn--lg btn--glow" href="music/"><span aria-hidden="true">▶</span> Try the Music app</a>
   </div>
 </section>
 
@@ -36,7 +38,7 @@
       <p class="lede">I design AI operating systems, metacognitive multi-agent architectures and deterministic simulation engines, from kernel-level invariants and formal contracts up to Android and web applications. I'm self-taught and work hands-on with LLM tooling (Gemini, Google AI Studio, Opal) to research, specify and build.</p>
       <p class="signature"><span>Signature architecture</span>A neuro-symbolic system with decoupled neural-inference and symbolic-reasoning pipelines over a hypergraph knowledge representation <em>(Neuro-symbolic Separated Dual-Pipeline Hypergraph Topology)</em>.</p>
       <ul class="stats" aria-label="At a glance">
-        <li><b>21<small class="stat-of"> / 500+</small></b><span>projects shown, of 500+ built</span></li>
+        <li><b>22<small class="stat-of"> / 500+</small></b><span>projects shown, of 500+ built</span></li>
         <li><b>14</b><span>engineering disciplines</span></li>
         <li><b>Go · Py · Kt</b><span>languages in code</span></li>
         <li><b>2026</b><span>active build year</span></li>
@@ -344,7 +346,21 @@
     <details class="deep"><summary>Technical deep dive</summary><div class="deep-body"><p>About 150 AI-produced songs, organized into character themes, the Team Dark Rocket series, the &#x27;96.7&#x27; collection and personalized songs.</p><ul class="bullets"><li>Designed a structured prompt menu for Suno V5 covering genre, tone, vocal personas and beat structure, and wrote a music-production study guide.</li></ul></div></details>
     <div class="foot"><div class="srcs"><span class="src src--drive">Drive</span><span class="src src--onedrive">OneDrive</span></div><div class="links"><span class="on-request">Files available on request</span></div></div>
   </div>
-</article><article class="card" id="video" style="--h:25">
+</article><article class="card" id="music-omni" style="--h:175">
+  <div class="thumb" aria-hidden="true"><span class="glyph">♪</span><span class="grid"></span></div>
+  <div class="body">
+    <div class="meta"><span class="kicker">Live web app · audio-to-video prompts</span><span class="dates">Nov 2026</span></div>
+    <h4>96.7 Music → Omni Storyboard</h4>
+    <span class="status status--code">Implemented code</span>
+    <p class="tldr"><strong>Turns a song into a beat-locked storyboard and one ready-to-paste prompt per shot for Gemini Omni Flash, all in the browser.</strong></p>
+    <dl class="pa"><div><dt>Problem</dt><dd>Music-video prompts written by hand drift off the beat, lose continuity between clips and can&#x27;t be reproduced.</dd></div><div><dt>Approach</dt><dd>Deterministic in-browser sound mapping, a shared validated timeline contract, Gemini only for lyrics and creative fields, and prompt assembly that refuses to run on invalid data.</dd></div></dl>
+    <h5 class="built-h">What I built</h5>
+    <ul class="bullets"><li>Integer-ms DSP sound map with a SHA-256 determinism hash</li><li>Shared JS/Python validator (23 rule codes) with parity tests</li><li>Key kept in tab memory only; strict CSP, no third-party scripts</li><li>Save/replay with provenance; 23-check headless e2e suite</li></ul>
+    <div class="stack"><span>Stack</span><ul><li>JavaScript (ES modules)</li><li>Web Audio API</li><li>Digital signal processing</li><li>JSON Schema / data contracts</li><li>Gemini API</li><li>Prompt engineering</li><li>SHA-256 / Web Crypto</li><li>Content-Security-Policy</li><li>Python</li><li>Playwright (Node)</li></ul></div>
+    <details class="deep"><summary>Technical deep dive</summary><div class="deep-body"><p>Upload a song and the page maps it in the browser (tempo, bars, key, sections, energy), aligns the lyrics, storyboards bar-locked 3–15 s shots with Gemini, and outputs one copy-paste prompt per shot for Google&#x27;s Gemini Omni Flash video model. It runs entirely client-side with the visitor&#x27;s own API key.</p><ul class="bullets"><li>Deterministic DSP sound map in integer milliseconds with integer round-half-up arithmetic; a SHA-256 determinism hash over canonical JSON (sorted keys, integers only) fingerprints every analysis.</li><li>Contract-first timeline schema with a shared validator (23 rule codes: beat grid, section tiling, bar-aligned shot cuts, lyric ranges, provenance) mirrored in JavaScript and Python, with parity tests on identical error lists and hashes.</li><li>Prompt assembly fails closed: it loads only the pinned validator and verifies it against committed probe and valid fixtures before building anything.</li><li>Security by design: the API key lives only in tab memory and goes only to Google&#x27;s API in a request header; strict Content-Security-Policy, no third-party scripts, model output rendered as text only.</li><li>Save and replay: projects carry per-stage provenance (model, prompt version, response hash) and replay to byte-identical prompts with zero model calls. Headless-Chromium end-to-end suite (23 checks) covers WAV and mp3, tamper rejection and mobile layout.</li><li>Built with a four-agent AI team (DSP, Gemini stages, validator and page, independent auditor) under Blake&#x27;s direction and review.</li></ul></div></details>
+    <div class="foot"><div class="srcs"></div><div class="links"><a class="btn btn--play" href="music/" aria-label="Open 96.7 Music to Omni Storyboard, a web app that turns a song into video prompts"><span aria-hidden="true">▶</span> Open the Music app</a></div></div>
+  </div>
+</article><article class="card card--wide" id="video" style="--h:25">
   <div class="thumb" aria-hidden="true"><span class="glyph">▶</span><span class="grid"></span></div>
   <div class="body">
     <div class="meta"><span class="kicker">Generative media</span><span class="dates">Mar – Oct 2026</span></div>
@@ -389,5 +405,6 @@
 <footer class="footer">
   <p>© 2026 Blake Allcorn · All systems and works described are original projects by Blake Allcorn.</p>
 </footer>
+<script src="assets/light.js?v=e6fb7cc5" defer></script>
 </body>
 </html>
