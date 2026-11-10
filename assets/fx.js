@@ -47,7 +47,7 @@
     document.addEventListener('pointermove', e => { el = e.target.closest && e.target.closest('.rtile, .svc, .row > summary, .rchip, .dtab'); x = e.clientX; y = e.clientY; if (el && !q) { q = true; requestAnimationFrame(paint); } }, { passive: true });
   }
 
-  // 4. Hero neural graph: blue-white symbolic lattice, violet bolts that hunt along its edges.
+  // 4. Hero neural graph: blue-white symbolic lattice that drifts. No bolt or strike — the loop owns lightning.
   //    Nodes and edges are suppressed inside a keep-out zone around every text block, so nothing draws over text.
   const hero = $('.hero'); if (!hero) return;
   const cv = document.createElement('canvas'); cv.className = 'neural'; cv.setAttribute('aria-hidden', 'true'); hero.prepend(cv);
@@ -112,23 +112,7 @@
       if (pd < 170 && segClear(px, py, nx[i], ny[i]) && !inKeep(px, py)) { g.strokeStyle = `hsla(268,95%,75%,${(1 - pd / 170) * .55})`; g.beginPath(); g.moveTo(px, py); g.lineTo(nx[i], ny[i]); g.stroke(); }
       const r = 2 + lit[i] * 3; g.fillStyle = `hsla(${lit[i] > .05 ? 268 : 205},100%,${85 + lit[i] * 12}%,${.55 + lit[i] * .45})`;
       g.beginPath(); g.arc(nx[i], ny[i], r, 0, 6.2832); g.fill(); }
-    // bolt: ignition -> travel -> afterglow
-    const age = t - bornAt, TRAVEL = 560, GLOW = 700;
-    if (plen > 1 && age < TRAVEL + GLOW) {
-      const segs = plen - 1, head = Math.min(segs, (age / TRAVEL) * segs), fade = age < TRAVEL ? 1 : 1 - (age - TRAVEL) / GLOW;
-      bl = 0; BUF[bl++] = nx[path[0]]; BUF[bl++] = ny[path[0]];
-      for (let s = 0; s < segs && s < head; s++) {
-        const a = path[s], b = path[s + 1], f = Math.min(1, head - s);
-        jag(nx[a], ny[a], nx[a] + (nx[b] - nx[a]) * f, ny[a] + (ny[b] - ny[a]) * f, 14 * fade);
-        if (f === 1) lit[b] = 1;
-      }
-      for (let pass = 0; pass < 2; pass++) {
-        g.strokeStyle = pass ? `hsla(270,100%,96%,${fade})` : `hsla(268,95%,66%,${fade * .55})`; g.lineWidth = pass ? 1.8 : 7;
-        g.beginPath(); g.moveTo(BUF[0], BUF[1]); for (let k = 2; k < bl; k += 2) g.lineTo(BUF[k], BUF[k + 1]); g.stroke();
-      }
-      lit[path[0]] = 1;
-    }
-    if (!reduce && t > nextBolt) { fire(-1, t); nextBolt = t + 700 + Math.random() * 900; }
+    // no hunting bolt: the hero loop is the only lightning
     if (!reduce && visible && !document.hidden) raf = requestAnimationFrame(draw); else raf = 0;
   };
   const kick = () => { if (!raf && !reduce && visible && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(draw); } };
@@ -136,12 +120,9 @@
   if ('ResizeObserver' in window) new ResizeObserver(() => layout()).observe(hero);
   hero.addEventListener('pointermove', e => { const b = hero.getBoundingClientRect(); px = e.clientX - b.left; py = e.clientY - b.top; }, { passive: true });
   hero.addEventListener('pointerleave', () => { px = py = -1e4; });
-  hero.addEventListener('pointerdown', e => { if (e.target.closest('a,button')) return; const b = hero.getBoundingClientRect(), x = e.clientX - b.left, y = e.clientY - b.top;
-    let best = -1, bd = 1e9; for (let i = 0; i < N; i++) { if (blocked[i]) continue; const d = (nx[i] - x) ** 2 + (ny[i] - y) ** 2; if (d < bd) { bd = d; best = i; } }
-    if (best >= 0) { fire(best, performance.now()); kick(); } }, { passive: true });
   new IntersectionObserver(es => { visible = es[0].isIntersecting; kick(); }).observe(hero);
   document.addEventListener('visibilitychange', kick);
-  if (reduce) draw(0); else { nextBolt = performance.now() + 600; kick(); }
+  if (reduce) draw(0); else kick();
 })();
 /* Ready-tile media: load and play only while in view; poster only under reduced motion. sig: BWA_15.2003075_SOV_96.7Hz_SHA-BEWA_69912070 */
 (function(){var vs=document.querySelectorAll('.rtile__media video[data-src]');if(!vs.length)return;
